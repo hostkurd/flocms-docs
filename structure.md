@@ -1,5 +1,7 @@
 # Directory structure
 
+The skeleton installs five Composer packages. See [framework and packages](/docs/{{version}}/packages) for their responsibilities and versions. Applications that enable modules also add the module layout described in [modules](/docs/{{version}}/modules#creating-a-module).
+
 A new FloCMS project is small. Here is what each folder is for. To see how these pieces work together on a request, read the [request lifecycle](/docs/{{version}}/lifecycle).
 
 ## The project root
@@ -22,7 +24,7 @@ my-site/
 ├── vendor/         Composer packages (not in Git)
 ├── views/          One folder of views per controller
 ├── .env            Your environment settings (not in Git)
-├── composer.json   Packages, pinned to exact versions
+├── composer.json   Package requirements (exact pins and compatible ranges)
 └── flo             The command-line launcher: php flo
 ```
 

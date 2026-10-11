@@ -34,6 +34,8 @@ A disk is a place to store files. The example configuration has three:
 
 `default_disk` picks the disk when you don't name one. For S3, also run `composer require aws/aws-sdk-php` and set `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION`, `AWS_BUCKET` and, optionally, `AWS_URL` as environment variables.
 
+For reading/deleting stored files, authorized private downloads and S3 limitations, see [storage disks](/docs/{{version}}/storage). Setting `visibility('private')` on a public local disk does not move the file outside its public root; choose the private disk for private files.
+
 ## Uploading a file
 
 ```php
@@ -67,6 +69,21 @@ public function admin_attach(): void
 The form needs `enctype="multipart/form-data"` and `@csrf`. With `useDatePath()`, files go into year and month folders, such as `documents/2026/10/`.
 
 `UploadResult` tells you what was stored: `path()`, `url()`, `filename()`, `originalName()`, `extension()`, `mime()`, `size()`, `disk()`, and `toArray()` for all of it. Save the path in your database, not the absolute file system path.
+
+### Result reference
+
+| Methods | Returns |
+|---|---|
+| `disk()`, `directory()`, `path()` | Disk name and relative storage location |
+| `url()`, `absolutePath()` | Configured/object URL and local absolute path; either can be `null` |
+| `filename()`, `originalName()`, `extension()`, `mime()`, `size()` | Stored name, original name, validated type and byte size |
+| `visibility()` | Stored visibility metadata |
+| `width()`, `height()` | Image dimensions when available |
+| `versions()`, `version($name)`, `versionUrl($name)` | Image version metadata, one version or its URL |
+| `poster()` | A video's poster as `UploadResult`, or `null` |
+| `toArray()` | All result metadata, including server-only paths |
+
+Do not expose `toArray()` wholesale to public clients. The API's upload trait removes absolute server paths and disk names; use a deliberate response shape elsewhere. A URL is not an authorization grant for private files.
 
 ### Options
 
@@ -114,6 +131,10 @@ $thumbUrl = $result->versionUrl('thumb');
 - Files are stored like `posts/2026/10/original/abc123.jpg`, `posts/2026/10/thumb/abc123.webp`.
 - `quality(85)`, `optimize()` and `driver('gd')` or `driver('imagick')` adjust processing. Imagick is used when installed, otherwise GD.
 
+When no versions are supplied, the defaults are `large` resized within 1600 × 1600, `medium` within 800 × 800, and a 300 × 300 `thumb`. Each version can set `format`, `quality` and `optimize`, overriding the uploader-wide settings. Output formats are JPG/JPEG, PNG, GIF and WebP, subject to the installed driver's support. `quality()` accepts 0–100, and optimization is enabled by default.
+
+When the original is kept, the main result path refers to it; with `keepOriginal(false)`, it refers to the first generated version. Version metadata includes its own path, URL, dimensions, MIME type and size. Use [storage operations](/docs/{{version}}/storage#images-and-related-files) to clean up related files.
+
 > [!WARNING]
 > Don't allow SVG uploads. SVG files can contain scripts, and the uploader doesn't clean them.
 
@@ -134,6 +155,8 @@ $result->poster()?->url();   // stored as "<video name>-poster.<ext>"
 - Limits: `video.max_bytes` (500 MB by default) and `video.poster_max_bytes` (5 MB).
 - The poster is checked before anything is stored. If storing it fails, the video is removed again.
 
+The uploader stores the validated video and a poster you supply. It does not transcode video, create streaming variants or extract a poster frame automatically.
+
 ## Large files in pieces
 
 Shared hosting often limits uploads to a few megabytes (`upload_max_filesize`). Chunked uploads send a large file in pieces below that limit, and can continue after a dropped connection:
@@ -141,10 +164,11 @@ Shared hosting often limits uploads to a few megabytes (`upload_max_filesize`). 
 ```php
 $chunked = Uploader::video()->directory('videos')->chunked();
 
-$session = $chunked->start($filename, $totalBytes, $userId);    // checks the name and size first
-$status  = $chunked->append($session['upload_id'], $offset, $_FILES['chunk'], $userId);
-$status  = $chunked->status($uploadId, $userId);                // to resume: continue at received_bytes
-$result  = $chunked->complete($uploadId, $userId);              // an UploadResult
+$owner = (string) $userId;                                   // derived from the signed-in user
+$session = $chunked->start($filename, $totalBytes, $owner);    // checks the name and size first
+$status  = $chunked->append($session['upload_id'], $offset, $_FILES['chunk'], $owner);
+$status  = $chunked->status($uploadId, $owner);                // to resume: continue at received_bytes
+$result  = $chunked->complete($uploadId, $owner);              // an UploadResult
 ```
 
 - Any uploader can be chunked. The finished file goes through that uploader's normal checks and storage.
@@ -157,6 +181,29 @@ $result  = $chunked->complete($uploadId, $userId);              // an UploadResu
 
 The package includes a complete example: `vendor/hostkurd/flocms-uploader/examples/chunked-upload.php` for the server and `chunked-upload.js` for the browser, with retries and resuming.
 
+### Chunk configuration and cleanup
+
+| `chunks` key | Default | Meaning |
+|---|---|---|
+| `directory` | `storage/uploads/.chunks` in the example | Private temporary data and session metadata |
+| `chunk_size` | 5 × 1024 × 1024 bytes | Suggested size sent to the client |
+| `max_chunk_bytes` | 10 × 1024 × 1024 bytes | Maximum accepted piece |
+| `max_bytes` | 2 × 1024 × 1024 × 1024 bytes | Total limit when the target uploader has no limit of its own |
+| `expire` | 86400 seconds | Idle time used by cleanup |
+
+A video's own 500 MB limit still applies; the 2 GB fallback does not override it. Fluent `chunkSize($bytes)`, `maxChunkBytes($bytes)` and `expireAfter($seconds)` override the chunk uploader's settings.
+
+Start/status/append return `upload_id`, `filename`, `total_bytes`, `received_bytes`, `complete`, `chunk_size` and `max_chunk_bytes`. `complete: true` means all bytes arrived; still call `complete()` to validate and store the assembled file. Resume from the server's `received_bytes` rather than the client's last attempted offset.
+
+```php
+$chunked->abort($uploadId, $owner);          // cancel and remove temporary files
+$removed = $chunked->purgeExpired();         // number of stale uploads removed
+```
+
+Cleanup measures the last activity from the temporary files' modification times. It runs when starting an upload and when called by the scheduler; expiry is not checked as a timestamp on every status/append call. Keep the cleanup task enabled. For an incorrect offset, `ChunkOffsetException::expectedOffset()` tells you where to resume.
+
+The owner is an optional string. Derive it server-side from the authenticated identity and pass the same value to every operation; don't trust an owner supplied in the request body. Without an owner, possession of the upload ID is the access mechanism.
+
 ### Through the API
 
 API controllers get ready-made endpoints with the `HandlesUploads` trait:
@@ -164,6 +211,8 @@ API controllers get ready-made endpoints with the `HandlesUploads` trait:
 ```php
 use FloCMS\Api\Controller;
 use FloCMS\Api\Uploads\HandlesUploads;
+use FloCMS\Core\Http\Request;
+use FloCMS\Core\Http\Response;
 use FloCMS\Uploader\Uploader;
 
 final class MediaController extends Controller
@@ -177,7 +226,26 @@ final class MediaController extends Controller
 }
 ```
 
-`startChunkedUpload()`, `appendChunk()`, `chunkedUploadStatus()`, `completeChunkedUpload()` and `abortChunkedUpload()` cover the chunked protocol. Upload errors become 422 responses, a piece at the wrong offset is a 409 with the expected `Upload-Offset`, and server paths are never returned.
+These protected helpers implement the protocol; register your controller's public actions as routes and pass the same configured `ChunkedUploader` and authenticated owner to each:
+
+| Helper | Request/response |
+|---|---|
+| `storeUpload($request, $uploader, $field = 'file')` | Multipart field; 201 with safe upload metadata |
+| `startChunkedUpload($request, $chunks, $owner = null)` | `filename` and positive `total_bytes`; 201 with session metadata |
+| `appendChunk($request, $chunks, $uploadId, $owner = null)` | `Upload-Offset` header (or `offset` field), multipart `chunk` or raw body; 200 with status |
+| `chunkedUploadStatus($chunks, $uploadId, $owner = null)` | 200 with the server's current status |
+| `completeChunkedUpload($chunks, $uploadId, $owner = null, $directory = null)` | 201 with the finished upload |
+| `abortChunkedUpload($chunks, $uploadId, $owner = null)` | 204 with no body |
+
+Validation failures become 422; an incorrect offset is 409 with `Upload-Offset` and `errors.expected_offset`; an unknown upload or mismatched owner is 404. Unexpected storage/processing failures follow normal exception handling. The trait does not add routes, authentication or rate limits automatically.
+
+For raw chunks, permit an appropriate non-JSON content type. `RequireJsonMiddleware` rejects them; allowing multipart there still does not allow raw bodies. For a cross-origin client, include `Upload-Offset` in the configured allowed and exposed CORS headers. See [CORS](/docs/{{version}}/api-cors).
+
+### Request-size limits
+
+The global API body limit is 2 MB by default, smaller than the uploader's 5 MB suggested chunk size. Either configure smaller chunks or raise the API limit as shown in [middleware](/docs/{{version}}/api-middleware#upload-body-limits).
+
+For multipart uploads, coordinate `upload_max_filesize`, `post_max_size`, web-server/proxy limits, the API body limit and `chunks.max_chunk_bytes`. Leave room for multipart fields and boundaries. Raw chunks also need sufficient server/API body limits. A total chunked-file limit is separate from a per-request limit.
 
 ## Security
 

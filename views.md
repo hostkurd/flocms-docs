@@ -96,3 +96,19 @@ Link to CSS, JavaScript and images in the active theme with `template_asset()`. 
 Templates are compiled to PHP in `views/cache/` the first time they're used, and again whenever they change. The web server must be able to write to that folder. `php flo optimize` compiles everything ahead of time, which is handy after a deployment, and `php flo view:clear` empties the cache.
 
 `Config::set('view.cache_path', ...)` moves the cache to another folder. When the folder can't be written, templates still work: they are compiled on every request instead, which is slower.
+
+Set `Config::set('view.cache', false)` to disable compiled-file caching explicitly. Use the boolean `false`; the string `'false'` does not disable it. Rendering then compiles and evaluates the template in memory. Cache files incorporate the template's path, modification time, size and compiler version.
+
+## Rendering a file directly
+
+Render a trusted template file without the page controller's view/layout selection:
+
+```php
+use FloCMS\Core\TemplateEngine;
+
+$html = TemplateEngine::renderFile(ROOT . '/templates/default/partials/header.html', ['title' => 'My site']);
+```
+
+The result is a string. Data is available as template variables and `$data`, and the usual caching rules apply. `TemplateEngine::compiledPath($file)` returns the compiled path, or `null` when caching is disabled/unavailable; `cacheDirectory()` returns the writable cache directory or `null`.
+
+`render_partial()` handles active-template lookup for you. `template_partial()` returns its path without rendering it. See [helpers](/docs/{{version}}/helpers#theme-assets-and-partials).

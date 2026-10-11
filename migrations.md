@@ -60,7 +60,7 @@ php flo migrate:fresh --seed # drop all tables, migrate again, then seed
 - Migrations run in file-name order, in numbered batches. Each one is recorded in the `migrations` table with a checksum, so `migrate:status` notices edited or missing files.
 - Only one `migrate` runs at a time.
 - With `APP_ENV=production`, commands that change data ask first. Deployment scripts pass `--force`.
-- `--pretend` shows the SQL without running it, and `--seed` runs the seeders afterwards.
+- `--pretend` lists the migrations that would run, without executing them; it does not print SQL. `--seed` runs the seeders after a normal migration run, not a pending-migration preview.
 - `migrate:rollback --step=3` undoes the last three migrations instead of the last batch.
 
 > [!CAUTION]
@@ -81,6 +81,8 @@ php flo migrate --package=hostkurd/flocms-api
 A package registers its migration folders in its `composer.json`. See [writing commands](/docs/{{version}}/writing-commands#commands-migrations-and-routes-from-packages).
 
 Core's module migration format also works: a file that returns `['up' => [...SQL...], 'down' => [...]]`.
+
+Accepting that array format does not make `php flo migrate` discover module manifests. The core module runner reads the manifest's explicit migration files and uses its own state and ledger tables. See [module migrations](/docs/{{version}}/module-migrations).
 
 ## Seeders
 

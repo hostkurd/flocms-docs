@@ -86,6 +86,10 @@ Router::redirect(SITE_URI . '/blog');
 
 JSON endpoints don't use the convention routing. They are declared explicitly in `api/routes.php` and served under `/api/v1`. See [building an API](/docs/{{version}}/api).
 
+## Routes supplied by modules
+
+Modules need explicit bootstrap and route loading. Declaring a namespaced page controller in a manifest does not change the conventional controller namespace or create its URL. Module-owned page actions need an availability check; API routes can use the kernel's module manager. See [module page requests](/docs/{{version}}/modules#booting-page-requests) and [module API routes](/docs/{{version}}/modules#loading-module-api-routes).
+
 ## Listing routes
 
 ```bash

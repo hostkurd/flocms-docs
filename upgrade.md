@@ -1,6 +1,6 @@
 # Upgrade guide
 
-FloCMS packages are pinned to exact versions, so nothing changes until you decide. Upgrade one site at a time, and test before you deploy.
+Core, API, CLI and uploader use exact version requirements; CAPTCHA uses `^1.0`. The lock file records the exact installed versions. Use `composer install` for repeatable deployments and update dependencies deliberately. Upgrade one site at a time, and test before you deploy.
 
 ## From 1.7.x to 1.7.4
 
@@ -12,7 +12,7 @@ FloCMS packages are pinned to exact versions, so nothing changes until you decid
 
 2. Optional: add the admin dashboard from 1.7.3, so `/admin/` no longer answers 404 after login. Copy `admin_index()` from the skeleton's `controllers/PagesController.php`, the view `views/pages/admin_index.html`, and the `roles` block from `config/config.php`.
 
-3. Check your controllers for public helper methods. Every public method declared on a controller can be reached from a URL, so make helpers `protected` or `private`. Since core 2.2.1, inherited, protected, private and static methods answer 404.
+3. Check your controllers for public helper methods. Public methods on your controller or your own base controller can be reached from a URL, so make helpers `protected` or `private`. Since core 2.2.1, methods inherited from `FloCMS\Core\Controller`, protected/private/static methods and magic method names answer 404.
 
 ## From 1.6 to 1.7
 
@@ -45,3 +45,15 @@ FloCMS packages are pinned to exact versions, so nothing changes until you decid
 - Run `php flo env:check` to find new `.env` keys.
 - Run `php flo view:clear` so templates are compiled again.
 - Read the [release notes](/docs/{{version}}/releases) for what changed.
+
+## Moving older API code
+
+`FloCMS\Core\Api` and `FloCMS\Core\ApiController` are deprecated. The API package also supplies `FloCMS\Api\Legacy\LegacyApiController` as a compatibility bridge, but new endpoints should use `FloCMS\Api\Controller`.
+
+1. Move handlers into `api/Controllers/` with the `App\Api\Controllers` namespace.
+2. Declare each HTTP method/path in `api/routes.php`, with authentication and rate limits where needed.
+3. Replace global input/query access with the handler's `Request` argument. Positional page parameters become named API route parameters.
+4. Return `Response` objects or resources rather than echoing JSON and exiting. Use the [controller helpers](/docs/{{version}}/api-controllers#controller-helpers) for the response envelope.
+5. Test clients against the `/api/v1` URLs, response bodies and status codes, then leave `LEGACY_API=false`.
+
+Keeping a compatibility class does not configure explicit routes, middleware or authorization for you. See [building an API](/docs/{{version}}/api).

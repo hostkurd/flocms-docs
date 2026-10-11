@@ -33,6 +33,8 @@ public function store(): void
 
 JSON bodies are only read by `input()` and `all()` when the request's `Content-Type` is JSON. URL parameters aren't in the request; they're in `$this->params`. See [routing](/docs/{{version}}/routing#parameters).
 
+That positional-parameter rule is for page controllers. API requests have named route parameters through `route()` and `routeParams()`. See the [complete HTTP reference](/docs/{{version}}/http) for raw bodies, files, cookies and immutable request attributes.
+
 ## Cleaning single values
 
 `FloCMS\Core\Input` turns a raw value into the type you expect, with a fallback when it doesn't fit:
@@ -45,6 +47,8 @@ $page  = Input::int($this->request->queryValue('page'), 1);  // 1 unless it's an
 $email = Input::email($this->request->input('email'));       // '' unless it's a valid address
 $agree = Input::bool($this->request->input('agree'));        // "1", "true", "on", "yes" are true
 ```
+
+See [input utilities](/docs/{{version}}/helpers#converting-input) for defaults and limitations. These conversions do not replace field validation.
 
 ## Validating input
 

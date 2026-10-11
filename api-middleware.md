@@ -141,12 +141,27 @@ curl https://example.com/api/v1/health
 
 | Response | Meaning |
 |---|---|
-| `200 {"status":"ok","db":"ok"}` | The site and its database work |
-| `200 {"status":"ok","db":"not_configured"}` | The site has no database |
-| `503`, `"db":"down"` | The database doesn't answer |
+| `200 {"success":true,"data":{"status":"ok","db":"ok"}}` | The site and its database work |
+| `200 {"success":true,"data":{"status":"ok","db":"not_configured"}}` | The site has no database |
+| `503 {"success":false,"message":"Service unavailable.","errors":{"status":"fail","db":"down"}}` | The database doesn't answer |
+
+The HTTP status stays 200 for success and 503 for an unavailable database. Successful health data is wrapped by `ResponseFactory::success()`; a database failure uses `ResponseFactory::error()` and sends `Retry-After: 30`. The controller returns these fixed health fields, not the database driver's exception details.
 
 The health route keeps working during maintenance mode, so monitors can tell maintenance from an outage.
 
 ## Maintenance mode
 
 While `php flo down` is active, the API answers 503 with a JSON message and a `Retry-After` header. IPs passed to `--allow` and IPs in `API_MAINTENANCE_ALLOWED_IPS` keep access. See [maintenance mode](/docs/{{version}}/maintenance).
+
+## Upload body limits
+
+`BodySizeMiddleware` applies to multipart and raw upload requests as well as JSON. Its default is 2 MB, while the uploader suggests 5 MB chunks and accepts chunks up to 10 MB by default. Those defaults need coordination when using uploads through this API.
+
+For example, change the existing body middleware entry in `public/api.php`:
+
+```php
+new BodySizeMiddleware(maxBytes: 12 * 1024 * 1024),
+new JsonBodyMiddleware(),   // retain the independent 2 MB JSON limit
+```
+
+Configure the web server and PHP limits consistently, leaving room for multipart overhead. Alternatively, keep the 2 MB API limit and configure smaller chunks, such as a 1 MB `chunk_size` and `max_chunk_bytes`. Raising a route-level limit cannot bypass a rejection by earlier global middleware. See [upload limits](/docs/{{version}}/uploader#request-size-limits).

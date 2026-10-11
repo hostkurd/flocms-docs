@@ -1,5 +1,7 @@
 # Request lifecycle
 
+The skeleton wires these stages together. The [package overview](/docs/{{version}}/packages) distinguishes that setup from standalone package usage. Applications using modules also add [configuration and provider booting](/docs/{{version}}/modules#configuring-the-runtime); those stages are not enabled automatically.
+
 You can build a FloCMS site without knowing what happens between the browser's request and your controller. But when something behaves unexpectedly, it helps to know the order of the steps. This page follows one page request from start to finish.
 
 ## The short version
@@ -71,7 +73,7 @@ The router's controller name becomes a class: `blog_post` becomes `FloCMS\Contro
 
 1. The controller and action names contain only letters, digits and `_`.
 2. The class exists and extends `FloCMS\Core\Controller`.
-3. The action is a public, non-static method declared on your controller.
+3. The action is a public, non-static method on your controller or your own base controller, excluding methods declared by `FloCMS\Core\Controller` and magic method names.
 4. The current user has the permission that `$actionPermissions` requires for it (403 otherwise).
 
 A failed name, class or method check answers 404, and a class that doesn't extend `Controller` is a 500 error. Then your action runs. See [controllers](/docs/{{version}}/controllers).

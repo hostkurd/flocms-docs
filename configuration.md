@@ -78,8 +78,11 @@ Config::set('blog.per_page', 10);
 | `db.host`, `db.port`, `db.name`, `db.user`, `db.pass`, `db.charset` | Filled from the `DB_*` keys. See [database](/docs/{{version}}/database). |
 | `auth.user_loader` | Reloads the signed-in user on admin requests. See [authentication](/docs/{{version}}/authentication). |
 | `view.cache_path` | Where compiled templates go, `views/cache/` by default |
+| `view.cache` | Compiled template caching; `true` by default, set the boolean `false` to disable it. See [views](/docs/{{version}}/views#compiled-templates). |
 
 Scheduled tasks are configured in `config/schedule.php`. See the [scheduler](/docs/{{version}}/scheduler).
+
+Uploads use a separate array loaded from `config/upload.php`. Modules need explicit runtime configuration in `config/modules.php`; there is no automatic module discovery/boot configuration in the skeleton. See [uploads](/docs/{{version}}/uploader#setting-it-up) and [modules](/docs/{{version}}/modules#configuring-the-runtime).
 
 ## Settings stored in the database
 

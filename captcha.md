@@ -56,7 +56,8 @@ public function contact(): void
     }
 
     $captcha = new CaptchaManager();
-    $valid = $captcha->verify($this->request->input('captcha'));
+    $input = $this->request->input('captcha');
+    $valid = $captcha->verify(is_string($input) ? $input : null);
     $captcha->clear();
 
     if (!$valid) {
@@ -101,6 +102,16 @@ $captcha = new CaptchaManager([
 
 The code is generated with `random_int()` and compared with `hash_equals()`.
 
+## Challenge lifecycle
+
+`output()` generates and stores a new challenge and renders its image. `refresh()` generates/stores a new code and returns the text; it does not render an image. Don't return that text to the visitor as a refresh endpoint. Reload the image endpoint instead.
+
+One `session_key` stores one code, so refreshing a second form or browser tab using the same key replaces the first form's challenge. Use distinct configured keys for independent forms and the same key for each form's image and verification endpoints.
+
+The package has no challenge timestamp or automatic expiry. `clear()` removes the code; session expiry removes session data according to PHP's settings. If a form needs a shorter lifetime, record and check a timestamp in your application as well.
+
+`getCaptcha()` exposes the underlying `Captcha` object: `generateText()` generates without storing, `store($text)` stores, `getStoredText()` reads, and `getConfig()` returns merged configuration. These are server-side utilities; do not expose stored answers to the client.
+
 ## Your own renderer
 
 To draw the captcha differently, implement `FloCMS\Captcha\Renderer\RendererInterface` and pass it as the second argument:
@@ -121,4 +132,4 @@ $captcha = new CaptchaManager([], new CustomRenderer());
 
 ## Captchas in the API
 
-The captcha is stored in the session, and the API has no session by default. For forms submitted through the API, rely on the API's rate limits and idempotency instead. See [CORS and rate limiting](/docs/{{version}}/api-cors#rate-limiting).
+The captcha is stored in the session, and the API has no session by default. Using this CAPTCHA through an API requires deliberate session/cookie integration; it does not become token-based automatically. API rate limits help limit abuse, while idempotency handles safe retries and does not verify that a client is human. See [CORS and rate limiting](/docs/{{version}}/api-cors#rate-limiting).

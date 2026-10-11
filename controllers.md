@@ -1,5 +1,7 @@
 # Controllers
 
+This page describes conventional page controllers. [API controllers](/docs/{{version}}/api-controllers) use explicit routes and can receive constructor dependencies from the [service container](/docs/{{version}}/container).
+
 A controller groups the actions for one part of your site. Each public method is an action that answers a URL.
 
 ## Creating a controller
@@ -120,7 +122,7 @@ See [error pages and logging](/docs/{{version}}/errors).
 
 ## Helper methods
 
-Every public method declared on your controller can be called from a URL. Make helper methods `protected` or `private`, so they can't be:
+Public methods declared on your controller or your own base controller can be called from a URL. Make helper methods `protected` or `private`, so they can't be:
 
 ```php
 protected function findOrFail(int $id): object

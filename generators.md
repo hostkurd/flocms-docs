@@ -54,6 +54,8 @@ php flo make:model Category --migration --dry-run -v
 
 The suffix is optional: `make:seeder PostsSeeder` and `make:seeder Posts` write the same file.
 
+`make:module` only generates the manifest and provider. Follow [modules](/docs/{{version}}/modules) to add services, configure bootstrap, synchronize, migrate and enable it. It does not add module-management CLI commands automatically.
+
 ## Names
 
 Names may contain letters, digits, `_` and `-`, and must start with a letter. Generators never write outside the project.

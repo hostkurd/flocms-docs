@@ -71,6 +71,8 @@ Cookie::delete('theme');
 
 Cookies are stored in the visitor's browser, and the visitor can change them. Don't keep anything in a cookie that you'd trust without checking.
 
+`Cookie::set()` and `delete()` update `$_COOKIE` for subsequent direct reads in the current request. The captured `Request` object keeps its original cookie snapshot; see [HTTP requests](/docs/{{version}}/http#files-and-cookies).
+
 ## CSRF protection
 
 Cross-site request forgery is when another website makes a visitor's browser send a request to your site, for example a hidden form that deletes a post. FloCMS blocks it with a token that only your pages know.

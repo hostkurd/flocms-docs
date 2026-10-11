@@ -147,6 +147,14 @@ The skeleton's `FirstAdminTest` uses this. Remember that your pages always conne
 - **Commands:** `ApplicationTester` runs `php flo` commands inside PHPUnit and feeds answers to their questions. See [testing commands](/docs/{{version}}/writing-commands#testing-commands).
 - **API:** `TestClient` sends requests straight to the API kernel, without a web server. See [testing your API](/docs/{{version}}/api-testing).
 
+## Testing services and modules
+
+Use a fresh [container](/docs/{{version}}/container) in each test and bind fake implementations before resolving services. For API tests, pass that container to the kernel, then assert resource data and metadata through [TestClient](/docs/{{version}}/api-testing).
+
+Module discovery/manifest tests can run without a database: create a temporary module root, then construct `ModuleDiscovery` with its `ModulePaths`. To test installed/enabled states, supply a fake `ModuleStateRepositoryInterface` with the states your test needs. Use `ModuleSystem::reset()` and `PageBlockRegistry::clear()` between tests that use those static services. The real bundled module migration runner needs a separate MySQL/MariaDB test database; see [module migrations](/docs/{{version}}/module-migrations).
+
+Test both enabled and disabled module routes. Pass the manager to the API kernel, since loading or tagging a route alone is not its runtime availability check. Private-download tests should check another user's attachment is rejected, and chunk tests should check incorrect offsets and mismatched owners. See [storage](/docs/{{version}}/storage#authorized-downloads) and [uploads](/docs/{{version}}/uploader#through-the-api).
+
 ## Continuous integration
 
 The skeleton includes `.github/workflows/tests.yml` for GitHub Actions. On pushes to `main` and on pull requests, it:

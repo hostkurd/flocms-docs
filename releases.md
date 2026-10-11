@@ -1,12 +1,12 @@
 # Release notes
 
-FloCMS follows semantic versioning, and every package is pinned to an exact version, so a site only changes when you upgrade it. The full history is in the [changelog](https://github.com/hostkurd/FloCMS/blob/main/CHANGELOG.md).
+FloCMS follows semantic versioning. Core, API, CLI and uploader use exact requirements; CAPTCHA uses `^1.0`. `composer.lock` records the installed versions, and `composer install` preserves them. The full history is in the [changelog](https://github.com/hostkurd/FloCMS/blob/main/CHANGELOG.md).
 
 ## 1.7.4
 
 Released October 11, 2026.
 
-- **Security.** Requires `hostkurd/flocms-core` 2.2.1: only public methods declared on your own controllers can be reached from a URL. Before, a URL could reach methods inherited from the base controller.
+- **Security.** Requires `hostkurd/flocms-core` 2.2.1: only public, non-static actions on your controllers or your own base controllers can be reached from a URL. Methods inherited from `FloCMS\Core\Controller` are blocked. Before, a URL could reach that base controller's methods.
 - `APP_VERSION` and the version checks in the test suite now match the release.
 
 Existing sites get the security fix with:

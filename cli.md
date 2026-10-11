@@ -63,6 +63,8 @@ Options every command accepts:
 
 All `make:` commands take `--dry-run` and `--force`. See [generators and stubs](/docs/{{version}}/generators).
 
+For `make:module`, see [module setup](/docs/{{version}}/modules). Module preparation and state changes use application code; the [module guides](/docs/{{version}}/module-migrations#an-application-preparation-command) show custom commands you can add.
+
 ## Database
 
 | Command | Description |
@@ -85,6 +87,8 @@ On `APP_ENV=production`, commands that change data ask first; deployment scripts
 | `view:clear` | Remove compiled templates from `views/cache` |
 | `optimize` | Compile every view and template ahead of time |
 | `optimize:clear` | `view:clear` and `cache:clear` together |
+
+Clearing all caches can remove a configured module registry. After `cache:clear --all`, [synchronize modules again](/docs/{{version}}/module-lifecycle#caches-and-long-running-processes) before serving requests. `optimize` only compiles templates.
 
 ## Inspection
 

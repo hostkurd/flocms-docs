@@ -26,6 +26,8 @@ FloCMS fills a handler's arguments by name and type:
 - **Other classes**, such as a model, are created for you, with their own constructor arguments filled the same way.
 - Default values and nullable arguments are used when nothing else fits.
 
+Interfaces and services with scalar constructor parameters need explicit bindings in the kernel's container. See [service container](/docs/{{version}}/container#using-it-with-the-api).
+
 ```php
 use FloCMS\Api\Controller;
 use FloCMS\Core\Http\Request;
@@ -83,7 +85,7 @@ Every error uses one JSON envelope:
 - Core's `HttpException` and `ValidationException` work too and keep their status (403, 404, 422).
 - Anything else is a 500, written to `storage/logs/api.log`. With `APP_DEBUG=true` the response shows the message, class, file and line; in production only "Internal Server Error". Details of 5xx `ApiException`s are hidden in production too.
 
-Every response carries an `X-Request-ID` header, and error bodies include it as `request_id`. A valid `X-Request-ID` sent by the client is reused, so you can follow one request through your logs.
+Every kernel response carries an `X-Request-ID` header, and exception error bodies include it as `request_id`. A valid `X-Request-ID` sent by the client is reused, so you can follow one request through your logs. When returning a `ResponseFactory::error()` directly, pass its optional `$requestId` argument if you also want that field in the body; the factory does not redact application-supplied errors automatically.
 
 ## Resources
 
@@ -138,6 +140,28 @@ return PostResource::make($post)->response($request, 201);   // a Response with 
 ```
 
 For paginated lists, see [pagination](/docs/{{version}}/api-pagination).
+
+### Resource metadata
+
+Add metadata beside `data` for one resource by overriding `meta()`:
+
+```php
+public function meta(Request $request): array
+{
+    return ['schema' => 'posts.v1'];
+}
+```
+
+For a collection:
+
+```php
+return PostResource::collection($posts)->withMeta(['source' => 'news']);
+// {"success":true,"data":[...],"meta":{"source":"news"}}
+```
+
+`withMeta()` returns a cloned collection and preserves earlier keys unless the new metadata supplies the same key. A collection does not automatically merge each item's metadata into its own metadata.
+
+`resolve($request)` gives the resource's data without a response envelope. `resource()` returns a single resource's underlying record; collections expose `items()` and `resourceClass()`. Use `response($request, $status)` when you need a `Response` with a chosen status. See [HTTP responses](/docs/{{version}}/http#creating-responses).
 
 ## Database access
 

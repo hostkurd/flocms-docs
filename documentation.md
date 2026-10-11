@@ -8,13 +8,17 @@
     - [Directory structure](/docs/{{version}}/structure)
     - [Deployment](/docs/{{version}}/deployment)
 - ## Architecture
+    - [Framework and packages](/docs/{{version}}/packages)
     - [Request lifecycle](/docs/{{version}}/lifecycle)
+    - [Service container](/docs/{{version}}/container)
 - ## The basics
     - [Routing](/docs/{{version}}/routing)
     - [Controllers](/docs/{{version}}/controllers)
     - [Models](/docs/{{version}}/models)
     - [Views and templates](/docs/{{version}}/views)
     - [Requests and validation](/docs/{{version}}/validation)
+    - [Requests and responses](/docs/{{version}}/http)
+    - [Helpers and utilities](/docs/{{version}}/helpers)
     - [Sessions and CSRF](/docs/{{version}}/session)
     - [Error pages and logging](/docs/{{version}}/errors)
     - [Localization](/docs/{{version}}/localization)
@@ -26,6 +30,11 @@
     - [Query builder](/docs/{{version}}/queries)
     - [Migrations](/docs/{{version}}/migrations)
     - [Seeding](/docs/{{version}}/seeding)
+- ## Modules
+    - [Modules](/docs/{{version}}/modules)
+    - [Module lifecycle](/docs/{{version}}/module-lifecycle)
+    - [Module migrations](/docs/{{version}}/module-migrations)
+    - [Module extensions](/docs/{{version}}/module-extensions)
 - ## API
     - [Building an API](/docs/{{version}}/api)
     - [Controllers and resources](/docs/{{version}}/api-controllers)
@@ -45,6 +54,7 @@
     - [Maintenance mode](/docs/{{version}}/maintenance)
 - ## Packages
     - [Uploads](/docs/{{version}}/uploader)
+    - [Storage disks](/docs/{{version}}/storage)
     - [Captcha](/docs/{{version}}/captcha)
 - ## Testing
     - [Testing](/docs/{{version}}/testing)

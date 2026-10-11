@@ -143,6 +143,8 @@ Then the route's own middleware runs. See [middleware](/docs/{{version}}/api-mid
 
 ## Next steps
 
+For services and modules, see the [container](/docs/{{version}}/container#using-it-with-the-api) and [module API route setup](/docs/{{version}}/modules#loading-module-api-routes).
+
 - [Controllers and resources](/docs/{{version}}/api-controllers): handlers, responses and errors
 - [Authentication](/docs/{{version}}/api-authentication): tokens, API keys and the admin session
 - [Validation](/docs/{{version}}/api-validation): checking request data
@@ -160,3 +162,44 @@ php flo list api              # all API commands
 
 > [!NOTE]
 > The old `/api/<controller>/<action>` route, with methods prefixed `api_`, has no authentication and skips CSRF checks. It is off unless `LEGACY_API=true` is set in `.env`. Move such endpoints to `api/routes.php`.
+
+## Using the API without the skeleton
+
+In a Composer project that requires `hostkurd/flocms-api`, create an entry point and route requests to it. This example serves one endpoint without FloCMS application bootstrap or a database:
+
+```php
+<?php
+declare(strict_types=1);
+
+require dirname(__DIR__) . '/vendor/autoload.php';
+
+use FloCMS\Api\Kernel;
+use FloCMS\Api\Middleware\BodySizeMiddleware;
+use FloCMS\Api\Middleware\ExceptionMiddleware;
+use FloCMS\Api\Middleware\JsonBodyMiddleware;
+use FloCMS\Api\Middleware\SecurityHeadersMiddleware;
+use FloCMS\Api\Router;
+use FloCMS\Core\Http\Request;
+use FloCMS\Core\Support\Container;
+
+$container = new Container();
+$router = new Router();
+$router->get('/api/v1/health', static fn (): array => ['status' => 'ok'])->name('health');
+
+$kernel = new Kernel(router: $router, container: $container);
+$kernel->middleware([
+    new SecurityHeadersMiddleware(),
+    new ExceptionMiddleware(),
+    new BodySizeMiddleware(),
+    new JsonBodyMiddleware(),
+]);
+$kernel->handle(Request::fromGlobals())->send();
+```
+
+The router matches the complete request path; it does not automatically add `/api` or `/v1`. Register [authentication](/docs/{{version}}/api-authentication), CORS, throttling and application services as your endpoints require. The skeleton's aliases and middleware are not supplied by loading the package alone.
+
+`middleware([...])` replaces the global list; `pipe($middleware)` appends one entry. A kernel starts with exception middleware and also has an exception-rendering fallback, but configure the full pipeline explicitly to get the behavior your application needs.
+
+`$kernel->includeRequestIdInBody()` adds `request_id` to successful envelopes created through the response factory. The `X-Request-ID` header is always set by the kernel; plain custom `Response` bodies are not rewritten.
+
+For files that return route registration callables or definition lists, use `RouteLoader($router, $container)->load($path)`. Module route files use [loadModules()](/docs/{{version}}/modules#loading-module-api-routes).

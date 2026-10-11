@@ -66,7 +66,42 @@ If your host's default `php` is a different version, use the full path it gives 
 
 ## Force HTTPS
 
-Uncomment the "force ssl" lines in the root `.htaccess` file.
+Use the hosting panel's HTTPS redirect or configure it in the web server serving the domain. For the project-root Apache rewrite setup, the root `.htaccess` has commented "force ssl" lines. For a `public/` document root or Nginx, configure the redirect for that active setup instead. Keep `APP_URL` set to the public HTTPS address.
+
+## Nginx
+
+Nginx does not read `.htaccess`. For a site at the domain root, the application locations can be configured as follows inside its server block. Replace the root and PHP-FPM socket with your server's actual paths:
+
+```nginx
+root /srv/my-site/public;
+index index.php;
+
+location / {
+    try_files $uri $uri/ /index.php?$query_string;
+}
+
+location ~ ^/api/v[0-9]+(?:/.*)?$ {
+    include fastcgi_params;
+    fastcgi_param SCRIPT_FILENAME $document_root/api.php;
+    fastcgi_param SCRIPT_NAME /api.php;
+    fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+}
+
+location ~ \.php$ {
+    try_files $uri =404;
+    include fastcgi_params;
+    fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+}
+
+location ~ /\.(?!well-known/) {
+    deny all;
+}
+```
+
+The API location must precede the generic PHP regex location. `SCRIPT_NAME /api.php` keeps the API's base-path calculation consistent while `REQUEST_URI` remains the client's API URL. This example is for a domain-root install; adapt the prefixes and script name for a subdirectory. Configure TLS/redirects in the domain's server blocks and test the configuration before reloading Nginx.
+
+If the application accepts uploads, align the server's request limit with [PHP and API upload limits](/docs/{{version}}/uploader#request-size-limits).
 
 ## Deploying updates
 
@@ -75,3 +110,5 @@ Uncomment the "force ssl" lines in the root `.htaccess` file.
 3. Run `composer install --no-dev` and `php flo migrate --force`.
 4. Run `php flo optimize` to compile templates ahead of time.
 5. Bring the site back: `php flo up`
+
+Applications using modules also synchronize and migrate their module registry before step 4, using their own [preparation command](/docs/{{version}}/module-migrations#an-application-preparation-command). `php flo migrate` and `optimize` do not perform that module preparation. Keep private uploads and chunk staging outside `public/`; see [storage](/docs/{{version}}/storage).

@@ -148,6 +148,58 @@ $router->get('/feed', [FeedController::class, 'index'])->middleware('partner:pos
 
 `AuthenticateMiddleware` takes `roles:` (any of them), `scopes:` (all of them) and `permissions:` (all of them).
 
+### Custom authenticators
+
+Implement `FloCMS\Api\Contracts\AuthenticatorInterface` to verify another credential. Return an `Identity` after verification, or `null` when the request has no valid credential. A header value alone is not proof of identity.
+
+For a single trusted integration, create `api/Auth/PartnerAuthenticator.php`:
+
+```php
+<?php
+declare(strict_types=1);
+
+namespace App\Api\Auth;
+
+use FloCMS\Api\Contracts\AuthenticatorInterface;
+use FloCMS\Api\Security\Identity;
+use FloCMS\Core\Http\Request;
+use InvalidArgumentException;
+
+final class PartnerAuthenticator implements AuthenticatorInterface
+{
+    public function __construct(private readonly string $secret)
+    {
+        if (strlen($secret) < 32) {
+            throw new InvalidArgumentException('Configure a partner token of at least 32 bytes.');
+        }
+    }
+
+    public function authenticate(Request $request, string $guard = 'default'): ?Identity
+    {
+        $provided = $request->header('X-Partner-Token');
+        if ($provided === null || !hash_equals($this->secret, $provided)) {
+            return null;
+        }
+
+        return new Identity('partner', scopes: ['feed.read'], permissions: []);
+    }
+}
+```
+
+Set `PARTNER_API_TOKEN` to a generated secret in `.env`. Add an alias in `public/api.php`, retaining the existing aliases:
+
+```php
+$partner = new \App\Api\Auth\PartnerAuthenticator((string) \FloCMS\Core\Env::get('PARTNER_API_TOKEN', ''));
+$kernel->aliases([
+    'partner' => static fn (string ...$scopes): AuthenticateMiddleware =>
+        new AuthenticateMiddleware($partner, scopes: $scopes),
+]);
+```
+
+Use `->middleware('partner:feed.read')` on the intended routes. `AuthenticateMiddleware` calls `authenticate()` with its configured `guard` (default `default`), stores the returned identity in the request's `identity` attribute, and checks requested roles/scopes/permissions. An authenticator may use `$guard` to select a credential source; this example has one integration and ignores it.
+
+For multiple users/partners, resolve credentials to records in your own repository rather than sharing this one fixed identity. See [the container](/docs/{{version}}/container) to inject that repository and [API testing](/docs/{{version}}/api-testing) to test authorized and rejected requests.
+
 ## JWT
 
 `JwtAuthenticator` accepts HS256 tokens and rejects every other algorithm. Keep the secret in `.env`; a secret shorter than 32 bytes is refused. Issue tokens with `Jwt::encode()`:
