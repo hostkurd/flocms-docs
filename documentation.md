@@ -58,3 +58,9 @@
     - [Captcha](/docs/{{version}}/captcha)
 - ## Testing
     - [Testing](/docs/{{version}}/testing)
+- ## Examples
+    - [Getting started](/docs/{{version}}/examples)
+    - [A complete blog page](/docs/{{version}}/example-blog)
+    - [A validated contact form](/docs/{{version}}/example-contact-form)
+    - [A reusable theme](/docs/{{version}}/example-theme)
+

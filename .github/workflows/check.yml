@@ -21,3 +21,28 @@ jobs:
 
       - name: Sidebar, links, anchors and code fences
         run: php .github/scripts/check-docs.php .
+
+  examples:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: ['8.1', '8.3']
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/checkout@v4
+        with:
+          repository: hostkurd/flocms-core
+          # Core 2.2.2, also used by the current FloCMS website.
+          ref: f8f97e00facf3646c8c50c79eb1e0446c3876685
+          path: .example-runtime/core
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: pdo, mbstring
+          coverage: none
+
+      - name: Render the documented examples
+        run: php .github/scripts/check-examples.php .example-runtime/core
+

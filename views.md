@@ -2,6 +2,8 @@
 
 Views hold your page markup. The Flo Template Engine adds a short syntax for printing values, conditions, loops and forms, and plain PHP works too.
 
+For a complete controller, view, partial, layout and stylesheet working together, follow [the blog example](/docs/{{version}}/example-blog). Then add [a contact form](/docs/{{version}}/example-contact-form) and [shared theme markup](/docs/{{version}}/example-theme).
+
 ## Views and layouts
 
 The view for `BlogController::index()` is `views/blog/index.html`. FloCMS renders it, then places the result inside the active layout:
@@ -11,6 +13,8 @@ The view for `BlogController::index()` is `views/blog/index.html`. FloCMS render
 
 In the layout, `<?= $data['content'] ?>` prints the rendered view. `APP_TEMPLATE` in `.env` picks the template; files missing from it come from `templates/default/`.
 
+The standard page dispatcher passes only the rendered `$content` to the layout, not every controller variable. Controller data is available in the page view; compute shared layout data independently and pass it explicitly to partials.
+
 ## Printing values
 
 ```html
@@ -18,7 +22,7 @@ In the layout, `<?= $data['content'] ?>` prints the rendered view. `APP_TEMPLATE
 <p>{{ $post['author'] }}</p>
 ```
 
-`{{ }}` escapes HTML, so it is safe for any value. To print trusted HTML as it is, use `{!! $html !!}`. In plain PHP, `e($value)` escapes a value the same way.
+`{{ }}` HTML-escapes printable values for text content and quoted HTML attributes. Select a property or array element instead of printing an entire record. HTML escaping does not encode JavaScript or validate URL schemes. To print trusted HTML as it is, use `{!! $html !!}`. In plain PHP, `e($value)` escapes a value.
 
 > [!WARNING]
 > Never use `{!! !!}` for anything a visitor typed. It prints raw HTML, which allows cross-site scripting.
@@ -85,6 +89,8 @@ Split repeated markup into partials in `templates/<template>/partials/` and rend
 
 Partials use the same template syntax as views.
 
+They do not automatically inherit local variables from the calling template. Pass the values they need in the second argument of `render_partial()`.
+
 ## Assets
 
 Link to CSS, JavaScript and images in the active theme with `template_asset()`. It falls back to the `default` theme when the file isn't in yours:
@@ -118,3 +124,4 @@ $html = TemplateEngine::renderFile(ROOT . '/templates/default/partials/header.ht
 The result is a string. Data is available as template variables and `$data`, and the usual caching rules apply. `TemplateEngine::compiledPath($file)` returns the compiled path, or `null` when caching is disabled/unavailable; `cacheDirectory()` returns the writable cache directory or `null`.
 
 `render_partial()` handles active-template lookup for you. `template_partial()` returns its path without rendering it. See [helpers](/docs/{{version}}/helpers#theme-assets-and-partials).
+
