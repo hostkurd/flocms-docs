@@ -1,0 +1,22 @@
+- ## Prologue
+    - [Release notes](/docs/{{version}}/releases)
+    - [Upgrade guide](/docs/{{version}}/upgrade)
+- ## Getting started
+    - [Installation](/docs/{{version}}/installation)
+    - [Configuration](/docs/{{version}}/configuration)
+    - [Directory structure](/docs/{{version}}/structure)
+    - [Deployment](/docs/{{version}}/deployment)
+- ## The basics
+    - [Routing](/docs/{{version}}/routing)
+    - [Controllers](/docs/{{version}}/controllers)
+    - [Views and templates](/docs/{{version}}/views)
+- ## Security
+    - [Roles and permissions](/docs/{{version}}/permissions)
+- ## Database
+    - [Migrations and seeders](/docs/{{version}}/migrations)
+- ## API
+    - [Building an API](/docs/{{version}}/api)
+- ## Command line
+    - [Commands](/docs/{{version}}/cli)
+    - [Scheduler](/docs/{{version}}/scheduler)
+    - [Maintenance mode](/docs/{{version}}/maintenance)
