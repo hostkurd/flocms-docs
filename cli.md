@@ -7,108 +7,140 @@
 ```bash
 php flo                          # every command, grouped
 php flo help make:controller     # usage, arguments, options and examples
+php flo make:controller --help   # the same
 php flo list api                 # the commands of one group
+php flo list --format=json       # for scripts
 ```
 
-- **Abbreviations** work when they're unambiguous: `php flo mig` runs `migrate`.
+- **Abbreviations** work when they're unambiguous: `php flo mig` runs `migrate`, and `php flo m:st` runs `migrate:status`.
 - **Typos** get a suggestion of the closest command.
-- **Exit codes:** `0` success, `1` failure, `2` invalid usage. Errors go to STDERR, so scripts and cron jobs can rely on them.
+- **Exit codes:** `0` success, `1` failure, `2` invalid usage, such as a missing argument. Errors go to STDERR, so scripts and cron jobs can rely on them.
+- **Any folder.** The project is the folder of the `flo` file, so `php ../flo make:model Post` from a subfolder still writes to `models/`.
 
 Options every command accepts:
 
 | Option | Meaning |
 |---|---|
-| `-h, --help` | Show the command's usage |
+| `-h, --help` | Show the command's usage, arguments, options and examples |
 | `-q, --quiet` | Only print errors |
 | `-v`, `-vv`, `-vvv` | More output; `-vvv` adds stack traces |
-| `-n, --no-interaction` | Never ask; use defaults |
+| `-V, --version` | The CLI and framework versions |
+| `--ansi`, `--no-ansi` | Force or disable colors (`NO_COLOR` is respected) |
+| `-n, --no-interaction` | Never ask; use defaults. Commands that need an answer fail. |
 | `--env=ENV` | Run with `APP_ENV=ENV` |
 
 ## Application
 
 | Command | Description |
 |---|---|
-| `about` | PHP, extensions, package versions, environment, database and paths |
-| `doctor` | Health check of the installation; exits with 1 when a check fails |
-| `key:generate` | Set `APP_KEY` in `.env` |
+| `about [--format=json]` | PHP, extensions, package versions, environment, database and paths |
+| `doctor [--format=json]` | Health check: PHP version and extensions, writable `storage/` and `views/cache/`, `.env`, `APP_KEY`, `APP_URL`, debug mode in production, database, pending migrations, rewrite rules and document root. Exits with 1 when a check fails. |
+| `key:generate [--force] [--show]` | Set `APP_KEY` in `.env`; `--force` replaces an existing key |
 | `env:check` | Keys of `.env.example` missing from `.env` |
-| `serve` | PHP's built-in server for `public/` (development only) |
-| `down` / `up` | [Maintenance mode](/docs/{{version}}/maintenance) |
+| `serve [--host=127.0.0.1] [--port=8000]` | PHP's built-in server for `public/`, routed like `.htaccess` (development only) |
+| `down`, `up` | [Maintenance mode](/docs/{{version}}/maintenance) |
+| `completion bash\|zsh\|fish\|powershell` | A shell completion script. See [writing commands](/docs/{{version}}/writing-commands#shell-completion). |
 
 ## Generators
 
-All generators take `--dry-run` (show what would be written) and `--force` (overwrite).
-
 | Command | Creates |
 |---|---|
-| `make:controller <Name>` | `controllers/NameController.php` (`--admin`, `--resource`, `--model`) |
-| `make:model <Name>` | `models/NameModel.php` (`--table=`, `--migration`) |
-| `make:view <controller> [view]` | `views/<controller>/<view>.html` and the controller action |
-| `make:route <Name>` | Controller, model and view |
-| `make:migration <name>` | A migration in `database/migrations` |
-| `make:seeder <Name>` | A seeder in `database/seeders` |
-| `make:api-controller <Name>` | `api/Controllers/NameController.php` |
+| `make:controller <Name> [--admin] [--resource] [--model] [--api]` | `controllers/NameController.php` |
+| `make:model <Name> [--table=] [--migration]` | `models/NameModel.php` |
+| `make:view <controller> [view] [--admin]` | A view and its controller action |
+| `make:route <Name> [view]` | Controller, model and view |
+| `make:api-controller <Name> [--resource]` | `api/Controllers/NameController.php` |
 | `make:resource <Name>` | `api/Resources/NameResource.php` |
-| `make:command <Name>` | `commands/NameCommand.php` |
-| `make:test <Name>` | A unit test, or a feature test with `--feature` |
+| `make:middleware <Name>` | `api/Middleware/Name.php` |
+| `make:request <Name>` | `api/Requests/NameRequest.php` |
+| `make:migration <name> [--create=] [--table=]` | A migration in `database/migrations/` |
+| `make:seeder <Name>` | `database/seeders/NameSeeder.php` |
+| `make:command <Name> [--command=app:name]` | `commands/NameCommand.php` |
+| `make:test <Name> [--feature]` | A test in `tests/Unit/` or `tests/Feature/` |
+| `make:module <id>` | `modules/<id>/module.php` and a service provider |
+| `stub:publish [stubs...] [--force]` | Copies the templates to `stubs/` |
+| `delete:controller\|model\|view\|route` | Removes generated code, after showing what and asking |
 
-`delete:controller`, `delete:model`, `delete:view` and `delete:route` show every file they will delete or edit, and ask first.
+All `make:` commands take `--dry-run` and `--force`. See [generators and stubs](/docs/{{version}}/generators).
 
-To change what the generators write, run `php flo stub:publish` and edit the copies in `stubs/`.
-
-## Database, cache and inspection
-
-| Command | Description |
-|---|---|
-| `migrate`, `migrate:status`, `migrate:rollback`, `migrate:fresh` | See [migrations](/docs/{{version}}/migrations) |
-| `db:seed`, `db:show`, `db:check` | Seed, list tables, check the connection |
-| `cache:clear`, `view:clear` | Empty `storage/cache` or the compiled templates |
-| `optimize`, `optimize:clear` | Compile every template ahead of time, or clear both caches |
-| `route:list` | Page routes and API routes in one table, with permissions |
-| `permission:list` | Roles, their permissions, and who can run each action |
-
-## Users, translations and logs
+## Database
 
 | Command | Description |
 |---|---|
-| `user:create`, `user:password`, `user:role`, `user:suspend`, `user:unsuspend`, `user:list` | Manage users |
-| `login:unlock <email\|ip>` | Unlock a throttled admin login |
-| `lang:missing`, `lang:add` | Check and add translation files |
-| `log:tail`, `log:clear`, `log:rotate`, `storage:check` | Logs and storage folders |
-| `schedule:run`, `schedule:list` | The [scheduler](/docs/{{version}}/scheduler) |
+| `migrate [--package=] [--pretend] [--seed] [--force]` | Run pending migrations |
+| `migrate:status [--package=]` | Which migrations ran, are pending, changed or missing |
+| `migrate:rollback [--step=N] [--pretend]` | Undo the last batch, or the last N migrations |
+| `migrate:fresh [--seed] [--force]` | Drop **every** table and migrate again |
+| `db:seed [--class=DatabaseSeeder] [--force]` | Run a seeder |
+| `db:show [--format=json]` | The connection and every table with its row count |
+| `db:check` | Is the database configured and reachable? |
+
+On `APP_ENV=production`, commands that change data ask first; deployment scripts pass `--force`. See [migrations](/docs/{{version}}/migrations) and [seeding](/docs/{{version}}/seeding).
+
+## Cache
+
+| Command | Description |
+|---|---|
+| `cache:clear [--all]` | Empty `storage/cache` (module caches are kept unless `--all`) |
+| `view:clear` | Remove compiled templates from `views/cache` |
+| `optimize` | Compile every view and template ahead of time |
+| `optimize:clear` | `view:clear` and `cache:clear` together |
+
+## Inspection
+
+| Command | Description |
+|---|---|
+| `route:list [--method=] [--path=] [--name=] [--source=] [--format=json]` | Page routes of `controllers/`, with the permission of each admin action, and the `/api/v1` routes in one table |
+| `permission:list [--format=json]` | Roles and their permissions, and which roles can run each controller action |
+
+## Users
+
+| Command | Description |
+|---|---|
+| `user:create [--role=] [--name=] [--email=] [--login=] [--password-stdin]` | Create a user; asks for anything not given, the password hidden |
+| `user:password <email>` | Set a new password |
+| `user:role <email> <role>` | Change a role: `user`, `editor`, `admin`, `super-admin` or a number |
+| `user:suspend <email>`, `user:unsuspend <email>` | Block or allow a user |
+| `user:list [--status=active\|pending\|suspended]` | List users |
+| `login:unlock <email\|ip>` | Lift a [login throttle](/docs/{{version}}/authentication#login-throttling) block |
+
+## Translations
+
+| Command | Description |
+|---|---|
+| `lang:missing [--lang=ar] [--base=en] [--format=json]` | Missing, empty and extra keys per language |
+| `lang:add <code> [--rtl] [--base=en] [--force]` | A new language file |
+
+See [localization](/docs/{{version}}/localization).
+
+## Scheduler and logs
+
+| Command | Description |
+|---|---|
+| `schedule:run [--task=]` | Run the tasks that are due; cron calls it every minute |
+| `schedule:list` | Every task with its next run and last result |
+| `log:tail [log] [--lines=50] [--follow]` | The end of a log in `storage/logs` |
+| `log:clear [log] [--force]` | Empty one log, or all of them |
+| `log:rotate [--max-size=10] [--keep=5]` | Rotate large logs |
+| `storage:check [--fix]` | Are the storage folders writable? `--fix` creates them. |
+
+See [scheduler](/docs/{{version}}/scheduler) and [logging](/docs/{{version}}/errors#logging).
+
+## API
+
+With flocms-api installed, as on every new site, `php flo list api` shows its commands:
+
+| Command | Description |
+|---|---|
+| `api:install-schema` | Create only the API tables |
+| `api:token:create <user-id> <name> [--scopes=] [--expires=]` | Issue a personal access token |
+| `api:token:list [--user=]`, `api:token:revoke <id>\|--user=` | List and revoke tokens |
+| `api:key:create <name> [--scopes=] [--user=] [--expires=]` | Create an API key |
+| `api:key:list`, `api:key:revoke <id>` | List and revoke keys |
+| `api:routes` | API routes with names and middleware |
+| `api:docs [--out=]` | The [OpenAPI document](/docs/{{version}}/api-openapi) |
+| `api:gc [--database]` | Delete stale rate-limit and idempotency data |
 
 ## Your own commands
 
-Classes in `commands/` (namespace `App\Commands`) are commands too. `php flo make:command SendReports` creates one:
-
-```php
-<?php
-declare(strict_types=1);
-
-namespace App\Commands;
-
-use FloCMS\CLI\Console\Command;
-use FloCMS\CLI\Console\Input\Definition;
-use FloCMS\CLI\Console\Input\Option;
-
-final class SendReportsCommand extends Command
-{
-    protected string $name = 'reports:send';
-
-    protected string $description = 'Email the weekly reports';
-
-    protected function configure(Definition $definition): void
-    {
-        $definition->option('dry-run', null, Option::VALUE_NONE, 'Do not send');
-    }
-
-    protected function handle(): int
-    {
-        $this->success('Reports sent.');
-
-        return self::SUCCESS;
-    }
-}
-```
-
-Inside `handle()`, read input with `argument()` and `option()`, write with `info()`, `success()`, `warn()`, `error()` and `table()`, and ask with `ask()`, `confirm()`, `choice()` and `secret()`.
+Classes in `commands/` are commands too, and packages can add their own. See [writing commands](/docs/{{version}}/writing-commands).

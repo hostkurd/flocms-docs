@@ -16,13 +16,14 @@ Every part is optional. Some examples:
 | `/blog` | `BlogController::index()` |
 | `/blog/show/5` | `BlogController::show()` with parameter `5` |
 | `/ar/blog/show/5` | The same, in Arabic |
+| `/blog/show` | `BlogController::show()` with no parameters |
 | `/admin/blog/edit/5` | `BlogController::admin_edit()`, in the admin panel |
-| `/blog-post` | `BlogPostController::index()` |
+| `/blog_post` | `BlogPostController::index()` |
 
-- **Language.** A first segment listed in `LANGUAGES` sets the language. Without it, `DEFAULT_LANG` is used.
+- **Language.** A first segment listed in `LANGUAGES` sets the language. Without it, `DEFAULT_LANG` is used. See [localization](/docs/{{version}}/localization).
 - **Area.** A segment named in the `routes` setting picks the area and its method prefix (see below).
-- **Controller.** Defaults to `pages`. Hyphens become words: `blog-post` runs `BlogPostController`.
-- **Action.** Defaults to `index`. Action names use letters, digits and `_`.
+- **Controller.** Defaults to `pages`. Underscores separate words: `blog_post` runs `BlogPostController`, and its views live in `views/blog_post/`.
+- **Action.** Defaults to `index`. Controller and action names use letters, digits and `_`; anything else, including a hyphen, answers 404.
 - **Parameters.** Everything after the action, decoded, in `$this->params`.
 
 ## Areas and method prefixes
@@ -46,6 +47,8 @@ class BlogController extends Controller
     public function admin_index(): void { /* /admin/blog */ }
 }
 ```
+
+Each area uses the layout of the same name, `templates/<template>/layouts/<area>.html`. The skeleton also registers a `login` area with the `login_` prefix; a template needs a `layouts/login.html` file before that area can be used.
 
 ## Parameters
 

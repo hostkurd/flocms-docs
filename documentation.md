@@ -1,22 +1,50 @@
 - ## Prologue
     - [Release notes](/docs/{{version}}/releases)
     - [Upgrade guide](/docs/{{version}}/upgrade)
+    - [Contribution guide](/docs/{{version}}/contributing)
 - ## Getting started
     - [Installation](/docs/{{version}}/installation)
     - [Configuration](/docs/{{version}}/configuration)
     - [Directory structure](/docs/{{version}}/structure)
     - [Deployment](/docs/{{version}}/deployment)
+- ## Architecture
+    - [Request lifecycle](/docs/{{version}}/lifecycle)
 - ## The basics
     - [Routing](/docs/{{version}}/routing)
     - [Controllers](/docs/{{version}}/controllers)
+    - [Models](/docs/{{version}}/models)
     - [Views and templates](/docs/{{version}}/views)
+    - [Requests and validation](/docs/{{version}}/validation)
+    - [Sessions and CSRF](/docs/{{version}}/session)
+    - [Error pages and logging](/docs/{{version}}/errors)
+    - [Localization](/docs/{{version}}/localization)
 - ## Security
+    - [Authentication](/docs/{{version}}/authentication)
     - [Roles and permissions](/docs/{{version}}/permissions)
 - ## Database
-    - [Migrations and seeders](/docs/{{version}}/migrations)
+    - [Getting started](/docs/{{version}}/database)
+    - [Query builder](/docs/{{version}}/queries)
+    - [Migrations](/docs/{{version}}/migrations)
+    - [Seeding](/docs/{{version}}/seeding)
 - ## API
     - [Building an API](/docs/{{version}}/api)
+    - [Controllers and resources](/docs/{{version}}/api-controllers)
+    - [Middleware](/docs/{{version}}/api-middleware)
+    - [Authentication](/docs/{{version}}/api-authentication)
+    - [Validation](/docs/{{version}}/api-validation)
+    - [Pagination and filtering](/docs/{{version}}/api-pagination)
+    - [CORS and rate limiting](/docs/{{version}}/api-cors)
+    - [Idempotency](/docs/{{version}}/api-idempotency)
+    - [OpenAPI documents](/docs/{{version}}/api-openapi)
+    - [Testing your API](/docs/{{version}}/api-testing)
 - ## Command line
     - [Commands](/docs/{{version}}/cli)
+    - [Generators and stubs](/docs/{{version}}/generators)
+    - [Writing commands](/docs/{{version}}/writing-commands)
     - [Scheduler](/docs/{{version}}/scheduler)
     - [Maintenance mode](/docs/{{version}}/maintenance)
+- ## Packages
+    - [Uploads](/docs/{{version}}/uploader)
+    - [Captcha](/docs/{{version}}/captcha)
+- ## Testing
+    - [Testing](/docs/{{version}}/testing)

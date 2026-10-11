@@ -8,20 +8,27 @@ FloCMS reads environment-specific values from `.env` and keeps application setti
 
 | Key | Meaning |
 |---|---|
+| `APP_NAME` | The application's name, used for example as the title of the OpenAPI document |
+| `APP_VERSION` | The skeleton version, shown on the welcome page |
 | `APP_ENV` | `local` while developing, `production` on the live site |
 | `APP_DEBUG` | `true` shows detailed error pages. Always `false` in production. |
 | `APP_KEY` | Random application key, set by `php flo key:generate` |
 | `APP_URL` | The site's address, e.g. `https://example.com` or `http://localhost/my-site` |
+| `API_URL` | Base address of an external API, available as the `API_URI` constant |
 | `APP_TEMPLATE` | The active template folder in `templates/` and `public/themes/` |
 | `SITE_NAME`, `SITE_NAME_ADMIN` | Names shown in the site and the admin panel |
-| `LANGUAGES`, `DEFAULT_LANG` | Enabled languages, e.g. `en,ar,ku`, and the default one |
-| `DB_TYPE`, `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME`, `DB_PASSWORD` | Database connection. Leave `DB_NAME` empty until the database exists. |
+| `PRIMARY_EMAIL` | The sender address of emails the site sends |
+| `LANGUAGES`, `DEFAULT_LANG` | Enabled languages, e.g. `en,ar,ku`, and the default one. See [localization](/docs/{{version}}/localization). |
+| `DB_TYPE`, `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME`, `DB_PASSWORD`, `DB_CHARSET` | Database connection. Leave `DB_NAME` empty until the database exists. See [database](/docs/{{version}}/database). |
 | `TRUSTED_PROXIES` | Reverse proxies (IPs or CIDR ranges) whose `X-Forwarded-For` header is trusted |
 | `API_CORS_ORIGINS` | Origins allowed to call the API, comma separated. `https://*.example.com` patterns work. |
 | `API_RATE_LIMIT` | API requests per minute per client |
+| `API_MAINTENANCE_ALLOWED_IPS` | IPs or CIDR ranges that can use the API during [maintenance mode](/docs/{{version}}/maintenance) |
 | `LEGACY_API` | The old `/api/<controller>/<action>` route. Leave `false` for new sites. |
 
 `php flo env:check` lists keys that exist in `.env.example` but are missing from your `.env`, which is useful after an upgrade.
+
+Lines starting with `#` are comments, and values may be wrapped in single or double quotes. A real environment variable with the same name wins over the `.env` value, so a host's own settings are never overwritten.
 
 Read a value anywhere with `Env::get()`:
 
@@ -60,4 +67,20 @@ The main settings:
 | `login_throttle` | Admin login attempts allowed per IP and per email in 15 minutes |
 | `trusted_proxies` | Filled from `TRUSTED_PROXIES` |
 
+Keys are plain strings: `db.host` is one key, not a nested array. Set your own settings the same way, in `config/config.php` or anywhere before you read them:
+
+```php
+Config::set('blog.per_page', 10);
+```
+
+| More settings | |
+|---|---|
+| `db.host`, `db.port`, `db.name`, `db.user`, `db.pass`, `db.charset` | Filled from the `DB_*` keys. See [database](/docs/{{version}}/database). |
+| `auth.user_loader` | Reloads the signed-in user on admin requests. See [authentication](/docs/{{version}}/authentication). |
+| `view.cache_path` | Where compiled templates go, `views/cache/` by default |
+
 Scheduled tasks are configured in `config/schedule.php`. See the [scheduler](/docs/{{version}}/scheduler).
+
+## Settings stored in the database
+
+`Config::getSetting('name')` reads a value from a `settings` table (columns `param`, `lang` and `value`) for the current language. It returns the default you pass, or `false`, when there is no database or no such table. The skeleton doesn't create this table; maintenance mode uses it for the `offline_mode` setting when it exists.

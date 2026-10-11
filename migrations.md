@@ -1,16 +1,10 @@
-# Migrations and seeders
+# Migrations
 
 Migrations create and change your database tables from code, so every copy of the site, on your computer or on the server, has the same structure.
 
 ## Connecting
 
-The database comes from `.env`:
-
-- **MySQL or MariaDB:** `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME`, `DB_PASSWORD`, `DB_CHARSET`
-- **SQLite:** `DB_TYPE=sqlite` with `DB_NAME=storage/database.sqlite`
-- **Any PDO driver:** `DB_DSN`
-
-`php flo db:check` tells you whether the database is configured and reachable, and `php flo db:show` lists its tables with row counts.
+Migrations use the database in `.env`. See [database](/docs/{{version}}/database) for the settings. `php flo db:check` tells you whether the database is configured and reachable, and `php flo db:show` lists its tables with row counts.
 
 ## Creating a migration
 
@@ -18,7 +12,9 @@ The database comes from `.env`:
 php flo make:migration create_posts_table
 ```
 
-creates `database/migrations/<timestamp>_create_posts_table.php`:
+creates `database/migrations/<timestamp>_create_posts_table.php`. A name like `create_posts_table` gives you a `CREATE TABLE` template for `posts`; `--create=posts` does the same for any name, and `--table=posts` gives an `ALTER TABLE` template for changing an existing table. The file name, without `.php`, is the migration's ID, and the timestamp keeps files in order.
+
+A migration returns an object with `up()`, which makes the change, and `down()`, which undoes it:
 
 ```php
 <?php
@@ -45,6 +41,13 @@ return new class extends Migration
 };
 ```
 
+Inside a migration:
+
+- `$db` is the same `Database` class your models use, so `query()` and the [query builder](/docs/{{version}}/queries) both work.
+- `$this->id($db)` writes an auto-increment primary key, and `$this->tableOptions($db)` adds InnoDB and `utf8mb4` on MySQL.
+- `up()` and `down()` run in a transaction. MySQL commits `CREATE`, `ALTER` and `DROP` immediately anyway; set `public bool $transactional = false;` when a migration must not run in one.
+- A migration without `down()` can't be rolled back; `migrate:rollback` stops with an error.
+
 ## Running migrations
 
 ```bash
@@ -57,30 +60,28 @@ php flo migrate:fresh --seed # drop all tables, migrate again, then seed
 - Migrations run in file-name order, in numbered batches. Each one is recorded in the `migrations` table with a checksum, so `migrate:status` notices edited or missing files.
 - Only one `migrate` runs at a time.
 - With `APP_ENV=production`, commands that change data ask first. Deployment scripts pass `--force`.
-- `--pretend` shows the SQL without running it.
+- `--pretend` shows the SQL without running it, and `--seed` runs the seeders afterwards.
+- `migrate:rollback --step=3` undoes the last three migrations instead of the last batch.
 
 > [!CAUTION]
 > `migrate:fresh` drops **every** table in the database. It asks first, and refuses on production without `--force`.
 
-The users table and the API tables are migrations too, so on a new site `php flo migrate` sets up everything.
+> [!WARNING]
+> Never edit a migration that has already run on another copy of the site. `migrate:status` reports it as changed there, but the change is never applied. Create a new migration for the next change instead.
+
+## Migrations from packages
+
+The users table is a migration in your `database/migrations/`. Packages ship their own migrations: flocms-api's create the API tables. `php flo migrate` runs them straight from `vendor/`, so on a new site one command sets up everything. They're tracked per package:
+
+```bash
+php flo migrate:status --package=hostkurd/flocms-api
+php flo migrate --package=hostkurd/flocms-api
+```
+
+A package registers its migration folders in its `composer.json`. See [writing commands](/docs/{{version}}/writing-commands#commands-migrations-and-routes-from-packages).
+
+Core's module migration format also works: a file that returns `['up' => [...SQL...], 'down' => [...]]`.
 
 ## Seeders
 
-Seeders fill tables with starting data. They live in `database/seeders` (namespace `Database\Seeders`):
-
-```bash
-php flo make:seeder PostsSeeder
-```
-
-```php
-final class DatabaseSeeder extends \FloCMS\CLI\Database\Seeder
-{
-    public function run(\FloCMS\Core\Database $db): void
-    {
-        $db->table('posts')->insert(['title' => 'Hello']);
-        $this->call(PostsSeeder::class);
-    }
-}
-```
-
-Run them with `php flo db:seed`, or one class with `php flo db:seed --class=PostsSeeder`.
+Starting data, such as categories or a demo account, is added by seeders. See [seeding](/docs/{{version}}/seeding).

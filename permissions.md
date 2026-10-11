@@ -42,7 +42,9 @@ protected array $actionPermissions = [
 ];
 ```
 
-A user without the permission gets a 403 page.
+A user without the permission gets a 403 page, before the action runs. A controller without `$actionPermissions` checks nothing; its `admin_` actions are still limited to users with admin access.
+
+`php flo make:controller Blog --admin` generates `'*' => 'blog.manage'`. Until you add that permission to other roles, or change it to one they hold such as `content.edit`, only Super Admins can open the controller.
 
 ## Checking inside an action
 
@@ -56,9 +58,18 @@ if (Auth::can('settings.edit')) {
 Auth::authorize('settings.edit'); // throws a 403 when not allowed
 ```
 
+When `config/config.php` has no `permissions` setting at all, `Auth::can()` allows everything to users with admin access, which is how sites behaved before permissions existed.
+
 ## Managing users
 
-User management only lets you assign roles up to your own, and only edit, delete or suspend users with a lower role. Super Admins can manage everyone.
+Two checks keep admins from promoting themselves or managing their superiors:
+
+```php
+Auth::canAssignRole(2);   // may I give someone role 2? Needs users.assign_role, and never above my own role
+Auth::canManageUser(1);   // may I edit, delete or suspend a user with role 1? Needs users.manage
+```
+
+`canManageUser()` only allows users of a strictly lower role, unless you hold `users.manage_any`. Super Admins hold `*`, so they can manage everyone.
 
 From the command line:
 
@@ -74,12 +85,6 @@ php flo permission:list
 
 ## Changes apply at once
 
-On every admin request, FloCMS reloads the user's role and status from the database (the `auth.user_loader` setting). Suspended or deleted users are logged out right away, and role changes apply on their next request.
+On every admin request, FloCMS reloads the user's role and status from the database. Suspended or deleted users are logged out right away, and role changes apply on their next request. See [authentication](/docs/{{version}}/authentication#sessions-end-at-once).
 
-## Login protection
-
-The admin login is throttled: by default 5 failed attempts per email and 20 per IP address in 15 minutes. Adjust `login_throttle` in `config/config.php`. To unlock someone:
-
-```bash
-php flo login:unlock admin@example.com
-```
+The admin login is also protected against password guessing. See [login throttling](/docs/{{version}}/authentication#login-throttling).

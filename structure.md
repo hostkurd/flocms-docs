@@ -1,6 +1,6 @@
 # Directory structure
 
-A new FloCMS project is small. Here is what each folder is for.
+A new FloCMS project is small. Here is what each folder is for. To see how these pieces work together on a request, read the [request lifecycle](/docs/{{version}}/lifecycle).
 
 ## The project root
 
@@ -11,7 +11,7 @@ my-site/
 ├── config/         config.php, schedule.php and bootstrap.php
 ├── controllers/    Page controllers (FloCMS\Controllers)
 ├── database/       migrations/ and seeders/
-├── includes/       Helpers loaded at startup, such as maintenance mode
+├── includes/       Startup helpers: maintenance mode, class aliases (compat.php)
 ├── lang/           Translations: en.php, ar.php, ku.php
 ├── models/         Models (FloCMS\Models)
 ├── public/         The web root: index.php, api.php, themes/, uploads/
@@ -32,6 +32,7 @@ my-site/
 
 - `index.php` handles every page request.
 - `api.php` handles `/api/v1/...` requests.
+- `conf_global.php` defines constants every request uses, such as `ACTIVE_LANG` and `VIEWS_PATH`.
 - `themes/<template>/` holds CSS, JavaScript, images and fonts. In templates, link to them with `template_asset('css/style.css')`.
 - `uploads/` receives uploaded files.
 

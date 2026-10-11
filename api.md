@@ -1,17 +1,42 @@
 # Building an API
 
-FloCMS includes a JSON API runtime, `hostkurd/flocms-api`, already wired up in new projects. Routes are explicit and versioned, and every response is JSON with security headers.
+FloCMS includes a JSON API runtime, `hostkurd/flocms-api`, already wired up in new projects. Routes are explicit and versioned, every response is JSON with security headers, and the pieces most APIs need are built in: authentication, validation, resources, pagination, CORS, rate limiting, OpenAPI documents and a test client.
 
-## Routes
+It runs on ordinary shared hosting: PHP 8.1 or newer with PDO, mbstring and fileinfo. APCu is used for rate limits when it's available.
 
-`public/api.php` serves the routes in `api/routes.php` under `/api`. Controllers and resources live in `api/` (namespace `App\Api\`):
+## How it's wired
+
+- `public/.htaccess` sends every `/api/v1/...` request to `public/api.php`.
+- `public/api.php` loads the same bootstrap and `.env` as your pages, sets up the middleware, and loads your routes.
+- Your routes live in `api/routes.php`, and your controllers and resources in `api/` (namespace `App\Api\`).
+
+Try it on a new site:
+
+```bash
+curl http://localhost:8000/api/v1/health
+# {"success":true,"data":{"status":"ok","db":"not_configured"}}
+```
+
+The API path has no session and no CSRF check by default. Private routes are protected with the `auth` middleware. See [authentication](/docs/{{version}}/api-authentication).
+
+## Defining routes
+
+`api/routes.php` returns a function that receives the router:
 
 ```php
+<?php
+
+use App\Api\Controllers\ContactController;
+use App\Api\Controllers\UsersController;
+use FloCMS\Api\Http\HealthController;
+use FloCMS\Api\Router;
+
 return static function (Router $router): void {
     $router->version('v1', static function (Router $router): void {
         $router->get('/health', new HealthController())->name('health');
 
         $router->post('/contact', [ContactController::class, 'store'])
+            ->name('contact.store')
             ->middleware('throttle:forms', 'idempotent');
 
         $router->group('/users', static function (Router $router): void {
@@ -22,55 +47,116 @@ return static function (Router $router): void {
 };
 ```
 
-- `get`, `post`, `put`, `patch`, `delete`, `head`, `options` and `map([...])` register routes.
-- A parameter matches one path segment. Constrain it with a regular expression after a colon: `{id:\d+}`.
-- `version('v1', ...)` prefixes routes with `/v1`.
-- `group()` shares a path prefix, middleware and a name prefix.
+These are the routes of a new project. `GET /api/v1/users/5` runs `UsersController::show()` with `$id = 5`.
 
-`php flo make:api-controller Posts --resource` creates a controller, and `php flo make:resource Post` a resource.
+### Methods
+
+```php
+$router->get('/posts', $handler);
+$router->post('/posts', $handler);
+$router->put('/posts/{id}', $handler);
+$router->patch('/posts/{id}', $handler);
+$router->delete('/posts/{id}', $handler);
+$router->map(['GET', 'POST'], '/search', $handler);
+```
+
+`head()` and `options()` exist too, but you rarely need them:
+
+- a `HEAD` request runs the `GET` route without a body
+- an `OPTIONS` request answers `204` with an `Allow` header
+- a known path with the wrong method answers `405` with `Allow`
+
+### Parameters
+
+A parameter in braces matches one path segment. Add a regular expression after a colon to constrain it:
+
+```php
+$router->get('/posts/{slug}', ...);                 // any single segment
+$router->get('/authors/{id:\d+}', ...);             // digits only
+$router->get('/{country:[a-z]{2}}/cities', ...);    // two letters
+```
+
+Values reach the handler URL-decoded. A constraint can't match across segments: `{path:.+/.+}` is rejected.
+
+### Groups and versions
+
+`group()` shares a path prefix, middleware and a name prefix with the routes inside it. Groups can be nested:
+
+```php
+$router->group('/admin', function (Router $router): void {
+    $router->get('/stats', [StatsController::class, 'index'])->name('stats');   // admin.stats
+}, ['auth:settings.view'], namePrefix: 'admin.');
+```
+
+`version('v1', ...)` is a group with the prefix `/v1` and the name prefix `v1.`.
+
+### Matching order
+
+Routes match in the order you register them, and the first match wins. Register specific routes before general ones:
+
+```php
+$router->get('/posts/featured', ...);     // before {slug}
+$router->get('/posts/{id:\d+}', ...);     // before {slug}
+$router->get('/posts/{slug}', ...);
+```
+
+With `APP_DEBUG=true`, the router is strict: a route that can never match, such as `/posts/{id}` after `/posts/{slug}`, or a duplicate route name, throws an error. In production the same problems are logged to `storage/logs/api.log`.
+
+### Route names
+
+Name routes to build their URLs:
+
+```php
+$router->url('v1.users.show', ['id' => 5], ['include' => 'roles']);
+// "/api/v1/users/5?include=roles"
+```
+
+## Versioning and deprecation
+
+Keep old clients working by adding a new version next to the old one, and mark the old one as deprecated:
+
+```php
+use FloCMS\Api\Middleware\Deprecated;
+
+$router->version('v1', $v1Routes, [new Deprecated(sunset: '2027-06-30', successor: 'https://example.com/api/v2')]);
+$router->version('v2', $v2Routes);
+```
+
+`Deprecated` adds `Deprecation`, `Sunset` and `Link` headers to every response of those routes.
+
+> [!IMPORTANT]
+> The skeleton's `public/.htaccess` only sends `/api/v1` to `api.php`. Before you add `v2`, change that rule, for example to `RewriteRule ^api/v[0-9]+(/.*)?$ api.php [L,QSA]`.
 
 ## What every request gets
 
-- **CORS** for the origins in `API_CORS_ORIGINS`. Patterns like `https://*.example.com` are allowed.
-- **Locale** from `?lang=` or the `Accept-Language` header.
-- **Rate limiting** per client: `API_RATE_LIMIT` requests per minute.
-- **No session and no CSRF check** by default, since API clients authenticate with tokens.
+The middleware in `public/api.php` runs for every API request, in this order:
 
-## Route middleware
+1. **Security headers**: `nosniff`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy` and `Cache-Control: no-store`
+2. **JSON errors**: every error, a 404 too, becomes a JSON response
+3. **CORS** for the origins in `API_CORS_ORIGINS`. See [CORS and rate limiting](/docs/{{version}}/api-cors).
+4. **Maintenance mode**: 503 while `php flo down` is active, except for `/api/v1/health` and allowed IPs
+5. **Locale** from `?lang=` or `Accept-Language`
+6. **Rate limiting**: `API_RATE_LIMIT` requests per minute per client
+7. **Body limits**: bodies over 2 MB are rejected, and malformed JSON is a 400
 
-| Middleware | Effect |
-|---|---|
-| `throttle:public`, `throttle:forms`, `throttle:auth` | Named rate limits: 60 per minute, 5 per minute, 10 per 15 minutes |
-| `auth`, `auth:users.manage` | A personal access token (`Authorization: Bearer ...`), or the admin session from same-origin JavaScript (with `X-CSRF-TOKEN`), optionally with a permission |
-| `idempotent` | Retries with the same `Idempotency-Key` header get the first response |
+Then the route's own middleware runs. See [middleware](/docs/{{version}}/api-middleware).
 
-## Tokens
+## Next steps
 
-The API's database tables are created by `php flo migrate`, or on their own with `php flo api:install-schema`. Then create a token for a user:
-
-```bash
-php flo api:token:create 1 "Mobile app"
-```
-
-The token is printed once. Send it as `Authorization: Bearer <token>`.
-
-## Examples in the skeleton
-
-New projects include working examples:
-
-- `ContactController`: validation
-- `UsersController`: pagination with filters and sorting, protected by a permission
-- `UserResource`: a resource that keeps the password and token columns out of responses
+- [Controllers and resources](/docs/{{version}}/api-controllers): handlers, responses and errors
+- [Authentication](/docs/{{version}}/api-authentication): tokens, API keys and the admin session
+- [Validation](/docs/{{version}}/api-validation): checking request data
+- [Pagination](/docs/{{version}}/api-pagination): pages, sorting and filters
+- [Testing](/docs/{{version}}/api-testing): calling your API from PHPUnit
 
 ## Commands
 
 ```bash
-php flo api:routes                           # list the API routes
-php flo api:docs --out=public/openapi.json   # OpenAPI 3.1 document
-php flo api:gc                               # clean up rate-limit and idempotency files
+php flo api:routes            # every API route with its name and middleware
+php flo list api              # all API commands
 ```
 
-In debug mode the OpenAPI document is also served at `/api/v1/openapi.json`. `api:gc` runs daily through the [scheduler](/docs/{{version}}/scheduler).
+`php flo route:list` shows the API routes next to your page routes.
 
 > [!NOTE]
 > The old `/api/<controller>/<action>` route, with methods prefixed `api_`, has no authentication and skips CSRF checks. It is off unless `LEGACY_API=true` is set in `.env`. Move such endpoints to `api/routes.php`.

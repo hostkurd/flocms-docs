@@ -18,7 +18,7 @@ In the layout, `<?= $data['content'] ?>` prints the rendered view. `APP_TEMPLATE
 <p>{{ $post['author'] }}</p>
 ```
 
-`{{ }}` escapes HTML, so it is safe for any value. To print trusted HTML as it is, use `{!! $html !!}`.
+`{{ }}` escapes HTML, so it is safe for any value. To print trusted HTML as it is, use `{!! $html !!}`. In plain PHP, `e($value)` escapes a value the same way.
 
 > [!WARNING]
 > Never use `{!! !!}` for anything a visitor typed. It prints raw HTML, which allows cross-site scripting.
@@ -44,6 +44,16 @@ In the layout, `<?= $data['content'] ?>` prints the rendered view. `APP_TEMPLATE
 | `@php` ... `@endphp` | A block of plain PHP |
 | `@lang('key')` | A translation from `lang/<language>.php` |
 | `@config('key')`, `@env('KEY')` | A config or `.env` value |
+| `@csrf` | The CSRF field for a form |
+
+> [!IMPORTANT]
+> The expression inside `@if()`, `@elseif()`, `@foreach()`, `@for()`, `@while()` and `@forelse()` ends at the first `)`, so it can't contain parentheses of its own. `@if(count($posts) > 0)` doesn't work. Compute the value first, or use plain PHP for that line:
+>
+> ```html
+> <?php if (count($posts) > 0): ?> ... <?php endif; ?>
+> ```
+
+The engine replaces these words anywhere in a view or layout, also inside HTML comments and JavaScript. To show a literal `@` before one of them, write it as `&#64;`.
 
 ## Forms
 
@@ -57,7 +67,7 @@ Every form that posts data needs a CSRF token. `@csrf` prints the hidden field:
 </form>
 ```
 
-For JavaScript requests, the admin layout includes a `csrf-token` meta tag and `js/csrf.js`, which sends the token as the `X-CSRF-TOKEN` header with fetch and jQuery requests.
+For JavaScript requests, the admin layout includes a `csrf-token` meta tag and `js/csrf.js`, which sends the token as the `X-CSRF-TOKEN` header with fetch and jQuery requests. See [sessions and CSRF](/docs/{{version}}/session#csrf-protection).
 
 ## Partials
 
@@ -79,14 +89,10 @@ Link to CSS, JavaScript and images in the active theme with `template_asset()`. 
 
 ## Translations
 
-`__('key')` returns the text for the current language from `lang/<language>.php`, and `@lang('key')` prints it. Placeholders are replaced from an array:
-
-```php
-<?= __('auth.welcome', ['name' => $name]) ?>
-```
-
-`php flo lang:missing` lists keys that are missing from a language file, and `php flo lang:add <locale> --rtl` creates a new right-to-left language file.
+`@lang('key')` prints the text for the current language from `lang/<language>.php`, and `__('key')` returns it in PHP. See [localization](/docs/{{version}}/localization) for placeholders, right-to-left languages and adding languages.
 
 ## Compiled templates
 
 Templates are compiled to PHP in `views/cache/` the first time they're used, and again whenever they change. The web server must be able to write to that folder. `php flo optimize` compiles everything ahead of time, which is handy after a deployment, and `php flo view:clear` empties the cache.
+
+`Config::set('view.cache_path', ...)` moves the cache to another folder. When the folder can't be written, templates still work: they are compiled on every request instead, which is slower.
