@@ -19,7 +19,9 @@ FloCMS reads environment-specific values from `.env` and keeps application setti
 | `SITE_NAME`, `SITE_NAME_ADMIN` | Names shown in the site and the admin panel |
 | `PRIMARY_EMAIL` | The sender address of emails the site sends |
 | `LANGUAGES`, `DEFAULT_LANG` | Enabled languages, e.g. `en,ar,ku`, and the default one. See [localization](/docs/{{version}}/localization). |
-| `DB_TYPE`, `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME`, `DB_PASSWORD`, `DB_CHARSET` | Database connection. Leave `DB_NAME` empty until the database exists. See [database](/docs/{{version}}/database). |
+| `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME`, `DB_PASSWORD`, `DB_CHARSET` | MySQL/MariaDB website connection. Leave `DB_NAME` empty until the database exists. See [database](/docs/{{version}}/database). |
+| `DB_TYPE` | CLI only: `mysql` (default), `mariadb`, or `sqlite`. Does not change the website connection. See [supported databases](/docs/{{version}}/database#supported-databases). |
+| `DB_DSN` | CLI only: an explicit PDO DSN, overriding `DB_TYPE`. Other drivers are not fully supported by the query builder and migration tools. See [supported databases](/docs/{{version}}/database#supported-databases). |
 | `TRUSTED_PROXIES` | Reverse proxies (IPs or CIDR ranges) whose `X-Forwarded-For` header is trusted |
 | `API_CORS_ORIGINS` | Origins allowed to call the API, comma separated. `https://*.example.com` patterns work. |
 | `API_RATE_LIMIT` | API requests per minute per client |
