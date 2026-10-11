@@ -81,12 +81,12 @@ public function show(Request $request, int $id): Response
         ->where('user_id', '=', $identity->id)
         ->first() ?? $this->fail('Document not found.', 404);
 
-    if ($attachment['disk'] !== 'private') {
+    if ($attachment->disk !== 'private') {
         $this->fail('Document not found.', 404);
     }
 
     $disk = (new StorageManager(require ROOT . '/config/upload.php'))->disk('private');
-    $path = $disk->path((string) $attachment['path']);
+    $path = $disk->path((string) $attachment->path);
     if ($path === null || !is_file($path) || !is_readable($path)) {
         $this->fail('Document not found.', 404);
     }
