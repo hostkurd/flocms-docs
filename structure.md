@@ -24,7 +24,7 @@ my-site/
 ├── vendor/         Composer packages (not in Git)
 ├── views/          One folder of views per controller
 ├── .env            Your environment settings (not in Git)
-├── composer.json   Package requirements (exact pins and compatible ranges)
+├── composer.json   Packages, pinned to exact versions
 └── flo             The command-line launcher: php flo
 ```
 

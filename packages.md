@@ -4,19 +4,19 @@ FloCMS has an application skeleton and five Composer packages. The skeleton give
 
 ## Versions in this guide
 
-These pages describe the FloCMS 1.7.4 skeleton and these package versions:
+These pages describe the FloCMS 1.7.5 skeleton and these package versions:
 
 | Package | Version | Responsibility |
 |---|---|---|
-| `hostkurd/flocms-core` | `2.2.1` | Page routing, controllers, models, database access, templates, configuration, authentication, HTTP classes, the service container and modules |
+| `hostkurd/flocms-core` | `2.2.2` | Page routing, controllers, models, database access, templates, configuration, authentication, HTTP classes, the service container and modules |
 | `hostkurd/flocms-api` | `1.2.0` | Explicit API routes, middleware, JSON responses, authentication, resources, pagination, idempotency, OpenAPI and API testing |
 | `hostkurd/flocms-cli` | `2.0.1` | `php flo`, code generators, migrations, seeders, scheduling, maintenance and project inspection |
 | `hostkurd/flocms-uploader` | `1.2.0` | File validation, storage disks, image versions, videos and resumable uploads |
-| `hostkurd/flocms-captcha` | `1.0.0` | Session-backed image challenges and custom renderers |
+| `hostkurd/flocms-captcha` | `1.1.0` | Session-backed, single-use image challenges and custom renderers |
 
-The skeleton requires exact versions of core, API, CLI and uploader. CAPTCHA uses the compatible range `^1.0`. `composer.lock` records the exact installed versions, including CAPTCHA; deploy with `composer install` to keep those versions. See [upgrading](/docs/{{version}}/upgrade).
+The skeleton requires exact versions of all five packages; CAPTCHA was pinned exactly in 1.7.5, before that it used `^1.0`. `composer.lock` records the exact installed versions; deploy with `composer install` to keep them. See [upgrading](/docs/{{version}}/upgrade).
 
-The framework version and package versions are separate. FloCMS 1.7 uses core 2.2.1; a module's own `version` is separate again.
+The framework version and package versions are separate. FloCMS 1.7.5 uses core 2.2.2; a module's own `version` is separate again.
 
 ## What the skeleton sets up
 

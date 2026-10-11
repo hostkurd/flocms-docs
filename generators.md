@@ -62,8 +62,7 @@ Names may contain letters, digits, `_` and `-`, and must start with a letter. Ge
 
 Generated code follows the same style everywhere: actions are lowercase with return types, models are reached through a lazy `model()` accessor so pages work before a database exists, and indentation is 4 spaces.
 
-> [!WARNING]
-> **Use one-word names for page controllers for now.** For a name like `BlogPost`, the generators write the view to `views/blog-post/`, but flocms-core 2.2.1 doesn't accept a hyphen in the URL: `/blog-post` answers 404, and `/blog_post` looks for its views in `views/blog_post/`. If you need a multi-word page controller, rename the view folder to `views/blog_post/` and link to `/blog_post`. API controllers, models and other generators aren't affected.
+Multi-word names use hyphens in URLs and view folders: `php flo make:route BlogPost` creates `BlogPostController`, answers at `/blog-post` and keeps its views in `views/blog-post/`. This needs flocms-core 2.2.2 or newer; with 2.2.1, `/blog-post` answered 404.
 
 ## Deleting generated code
 

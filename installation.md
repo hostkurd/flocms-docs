@@ -21,7 +21,7 @@ cd my-site
 Composer installs the framework packages, copies `.env.example` to `.env`, creates the `storage` folders and generates a fresh `APP_KEY` for you.
 
 > [!NOTE]
-> Core, API, CLI and uploader use exact version requirements; CAPTCHA uses `^1.0`. `composer.lock` records the exact installed versions. Deploy with `composer install` to preserve them. See [framework and packages](/docs/{{version}}/packages#versions-in-this-guide) and the [upgrade guide](/docs/{{version}}/upgrade).
+> All five FloCMS packages, core, API, CLI, uploader and CAPTCHA, use exact version requirements, and `composer.lock` records the installed versions. Deploy with `composer install` to preserve them. See [framework and packages](/docs/{{version}}/packages#versions-in-this-guide) and the [upgrade guide](/docs/{{version}}/upgrade).
 
 ## Start a local server
 

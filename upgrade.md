@@ -1,6 +1,22 @@
 # Upgrade guide
 
-Core, API, CLI and uploader use exact version requirements; CAPTCHA uses `^1.0`. The lock file records the exact installed versions. Use `composer install` for repeatable deployments and update dependencies deliberately. Upgrade one site at a time, and test before you deploy.
+All five FloCMS packages, core, API, CLI, uploader and CAPTCHA, use exact version requirements, and `composer.lock` records the installed versions. Use `composer install` for repeatable deployments and update dependencies deliberately. Upgrade one site at a time, and test before you deploy.
+
+## From 1.7.x to 1.7.5
+
+1. Require the new core and captcha releases:
+
+   ```bash
+   composer require hostkurd/flocms-core:2.2.2 hostkurd/flocms-captcha:1.1.0
+   ```
+
+2. Compiled templates are rebuilt automatically, because the template compiler version changed. Run `php flo optimize` after deploying if you compile templates ahead of time.
+
+3. If your code calls the captcha's `verify()` twice for the same answer, the second call now fails, because codes are single-use. Check once and keep the result, or set `'single_use' => false` in the captcha configuration. Calling `clear()` after `verify()` still works; it's just no longer needed. See [captcha](/docs/{{version}}/captcha).
+
+4. If you renamed multi-word view folders to `views/blog_post/` style and link to `/blog_post`, that keeps working. `/blog-post` now works too, with views in `views/blog-post/`.
+
+If you're on 1.7.3 or older, also follow the 1.7.4 steps below.
 
 ## From 1.7.x to 1.7.4
 

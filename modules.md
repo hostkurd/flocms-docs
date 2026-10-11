@@ -126,13 +126,21 @@ Create `config/modules.php`:
 declare(strict_types=1);
 
 use FloCMS\Core\App;
+use FloCMS\Core\DatabaseConnectionException;
 use FloCMS\Core\Modules\ModulePaths;
 use FloCMS\Core\Modules\ModuleSystem;
 use FloCMS\Core\Support\Container;
 
+// A database outage must not take every page down with it
+try {
+    $database = App::db();
+} catch (DatabaseConnectionException) {
+    $database = null;
+}
+
 ModuleSystem::configure(
     paths: ModulePaths::fromRoot(ROOT),
-    database: App::db(),
+    database: $database,
     container: new Container(),
     allowRuntimeDiscovery: false,
     tablePrefix: 'app_'
@@ -146,6 +154,15 @@ require_once ROOT . '/config/modules.php';
 ```
 
 This configures paths and services without booting providers. Keep configuration separate from booting so a deployment command can synchronize a missing registry first. The example uses your configured MySQL/MariaDB database; complete [database setup](/docs/{{version}}/database) first.
+
+> [!IMPORTANT]
+> Keep the `try`/`catch`. This file runs on every request, and `App::db()` throws when the database can't be reached. Without the `catch`, a database outage turns every page into an error, the static ones and `/api/v1/health` included.
+>
+> With the `catch`, the module system runs without its database while the server is down. Module state then comes from the state cache, `storage/cache/modules-state.json`, which is written whenever state is read from the database and refreshed by module migrations and state changes. Module migrations and `setEnabled()` still need the database.
+>
+> If that file is missing during an outage, modules fall back to their manifests, so only core and `default_enabled` modules count as enabled, and that fallback is written to the cache file. Once the database is back, delete `storage/cache/modules-state.json` or run your [preparation command](/docs/{{version}}/module-migrations#an-application-preparation-command) to reload the real state.
+
+`App::db()` opens the connection here, on every request, also for pages that never query the database. That's the price of storing module state in the database.
 
 `ModuleSystem::configure()` resets the previous module runtime. Call it once per application bootstrap, before resolving module services.
 

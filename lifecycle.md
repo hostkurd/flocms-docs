@@ -69,9 +69,9 @@ For requests under `/admin`:
 
 ## 7. The controller action
 
-The router's controller name becomes a class: `blog_post` becomes `FloCMS\Controllers\BlogPostController`. FloCMS then checks, in this order:
+The router's controller name becomes a class: `blog-post` and `blog_post` both become `FloCMS\Controllers\BlogPostController`. FloCMS then checks, in this order:
 
-1. The controller and action names contain only letters, digits and `_`.
+1. The controller name contains only letters, digits, `_` and single hyphens between words, and the action name only letters, digits and `_`.
 2. The class exists and extends `FloCMS\Core\Controller`.
 3. The action is a public, non-static method on your controller or your own base controller, excluding methods declared by `FloCMS\Core\Controller` and magic method names.
 4. The current user has the permission that `$actionPermissions` requires for it (403 otherwise).

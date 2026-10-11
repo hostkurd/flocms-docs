@@ -1,6 +1,20 @@
 # Release notes
 
-FloCMS follows semantic versioning. Core, API, CLI and uploader use exact requirements; CAPTCHA uses `^1.0`. `composer.lock` records the installed versions, and `composer install` preserves them. The full history is in the [changelog](https://github.com/hostkurd/FloCMS/blob/main/CHANGELOG.md).
+FloCMS follows semantic versioning. All five FloCMS packages, core, API, CLI, uploader and CAPTCHA, use exact version requirements, and `composer.lock` records the installed versions. `composer install` preserves them. The full history is in the [changelog](https://github.com/hostkurd/FloCMS/blob/main/CHANGELOG.md).
+
+## 1.7.5
+
+Released October 11, 2026.
+
+- **Multi-word page controllers.** Requires `hostkurd/flocms-core` 2.2.2: `/blog-post` runs `BlogPostController` and renders `views/blog-post/`, which is what `php flo make:route BlogPost` generates. In 1.7.4 these URLs answered 404.
+- **Template directives accept parentheses.** `@if(count($posts) > 0)`, `@foreach(array_slice($posts, 0, 3) as $post)` and `@lang('key', ['name' => strtoupper($name)])` compile correctly, and `@forelse ... @empty ... @endforelse` works. Existing templates compile to the same PHP as before.
+- **Security: single-use captcha codes.** Requires `hostkurd/flocms-captcha` 1.1.0, now pinned exactly like the other packages: `verify()` removes the code on every check, so a code can't be guessed by retrying or reused by submitting the form again.
+
+Existing sites get both with:
+
+```bash
+composer require hostkurd/flocms-core:2.2.2 hostkurd/flocms-captcha:1.1.0
+```
 
 ## 1.7.4
 

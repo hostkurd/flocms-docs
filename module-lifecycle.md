@@ -160,6 +160,8 @@ See [module migrations](/docs/{{version}}/module-migrations) for a preparation c
 | Error or behavior | Check |
 |---|---|
 | `ModuleSystem has not been configured` | Load `config/modules.php` before using the facade |
+| Every page errors while the database is down | Keep the `try`/`catch` around `App::db()` in [config/modules.php](/docs/{{version}}/modules#configuring-the-runtime) |
+| A module stays disabled after a database outage | Delete `storage/cache/modules-state.json` or run the preparation command once the database is back |
 | Compiled registry missing/invalid | Synchronize in a fresh deployment process; check writable cache paths |
 | Declared file missing | Create the manifest's route, extension and migration files first |
 | Module cannot be enabled | Inspect `runtimeStates(true)` and apply migrations/enable dependencies |

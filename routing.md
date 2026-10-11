@@ -18,12 +18,12 @@ Every part is optional. Some examples:
 | `/ar/blog/show/5` | The same, in Arabic |
 | `/blog/show` | `BlogController::show()` with no parameters |
 | `/admin/blog/edit/5` | `BlogController::admin_edit()`, in the admin panel |
-| `/blog_post` | `BlogPostController::index()` |
+| `/blog-post` | `BlogPostController::index()`, views in `views/blog-post/` |
 
 - **Language.** A first segment listed in `LANGUAGES` sets the language. Without it, `DEFAULT_LANG` is used. See [localization](/docs/{{version}}/localization).
 - **Area.** A segment named in the `routes` setting picks the area and its method prefix (see below).
-- **Controller.** Defaults to `pages`. Underscores separate words: `blog_post` runs `BlogPostController`, and its views live in `views/blog_post/`.
-- **Action.** Defaults to `index`. Controller and action names use letters, digits and `_`; anything else, including a hyphen, answers 404.
+- **Controller.** Defaults to `pages`. Hyphens separate words: `blog-post` runs `BlogPostController`, and its views live in `views/blog-post/`, the folder `php flo make:route BlogPost` creates. `blog_post` reaches the same controller but looks for views in `views/blog_post/`, so pick one form and link to it consistently. Hyphenated controller URLs need flocms-core 2.2.2 or newer.
+- **Action.** Defaults to `index`. Action names use letters, digits and `_`. Leading, trailing or double hyphens in a controller name, and anything else outside those characters, answer 404.
 - **Parameters.** Everything after the action, decoded, in `$this->params`.
 
 ## Areas and method prefixes

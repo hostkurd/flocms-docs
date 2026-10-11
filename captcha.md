@@ -58,7 +58,6 @@ public function contact(): void
     $captcha = new CaptchaManager();
     $input = $this->request->input('captcha');
     $valid = $captcha->verify(is_string($input) ? $input : null);
-    $captcha->clear();
 
     if (!$valid) {
         $this->data['error'] = 'The security code is wrong. Please try again.';
@@ -71,8 +70,10 @@ public function contact(): void
 
 `verify()` returns `true` when the typed text matches. Spaces around it are ignored, and by default upper and lower case don't matter.
 
-> [!IMPORTANT]
-> Call `clear()` after every check, successful or not. `verify()` doesn't remove the code, so without `clear()` a script could keep guessing the same code. After `clear()`, the form shows a new image.
+Each code can be checked **once**. `verify()` removes the stored code on every check, right or wrong, so a script can't keep guessing the same code and a submitted form can't be replayed. After a failed check, the form needs a new image, which it gets when the page shows the form again. Check once per request and keep the result; a second `verify()` call fails.
+
+> [!NOTE]
+> Single-use codes arrived in flocms-captcha 1.1.0 (FloCMS 1.7.5). With 1.0.0, `verify()` kept the code, so you had to call `clear()` after every check. Calling `clear()` after `verify()` still works; it's just no longer needed.
 
 A captcha doesn't replace CSRF protection; keep `@csrf` in the form. See [sessions and CSRF](/docs/{{version}}/session#csrf-protection).
 
@@ -98,6 +99,7 @@ $captcha = new CaptchaManager([
 | `characters` | `ABCDEFGHJKLMNPQRSTUVWXYZ23456789` | The characters to pick from; easily confused ones like `0`, `O`, `1` and `I` are left out |
 | `case_sensitive` | `false` | |
 | `session_key` | `flocms_captcha` | Where the code is stored in the session |
+| `single_use` | `true` | `verify()` removes the code on every check. Set `false` only if you must check the same code twice, and call `clear()` yourself. |
 | `fonts` | three fonts in the package | TrueType font files to pick from |
 
 The code is generated with `random_int()` and compared with `hash_equals()`.
@@ -108,7 +110,7 @@ The code is generated with `random_int()` and compared with `hash_equals()`.
 
 One `session_key` stores one code, so refreshing a second form or browser tab using the same key replaces the first form's challenge. Use distinct configured keys for independent forms and the same key for each form's image and verification endpoints.
 
-The package has no challenge timestamp or automatic expiry. `clear()` removes the code; session expiry removes session data according to PHP's settings. If a form needs a shorter lifetime, record and check a timestamp in your application as well.
+The package has no challenge timestamp or automatic expiry. `clear()` removes the code, and so does `verify()` with the default `single_use`; session expiry removes session data according to PHP's settings. If a form needs a shorter lifetime, record and check a timestamp in your application as well.
 
 `getCaptcha()` exposes the underlying `Captcha` object: `generateText()` generates without storing, `store($text)` stores, `getStoredText()` reads, and `getConfig()` returns merged configuration. These are server-side utilities; do not expose stored answers to the client.
 

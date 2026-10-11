@@ -57,7 +57,7 @@ FLO_TEST_MYSQL_NAME=flocms_test vendor/bin/phpunit
 
 ## Versions and releases
 
-Every FloCMS package follows [semantic versioning](https://semver.org). The skeleton pins core, API, CLI and uploader exactly and uses `^1.0` for CAPTCHA; `composer.lock` records the installed versions. Dependency updates are deliberate, so:
+Every FloCMS package follows [semantic versioning](https://semver.org). The skeleton pins all five packages exactly, and `composer.lock` records the installed versions. Dependency updates are deliberate, so:
 
 - fixes go out as patch releases (2.2.0 → 2.2.1)
 - new features go out as minor releases, and must not break existing sites

@@ -46,12 +46,18 @@ In the layout, `<?= $data['content'] ?>` prints the rendered view. `APP_TEMPLATE
 | `@config('key')`, `@env('KEY')` | A config or `.env` value |
 | `@csrf` | The CSRF field for a form |
 
-> [!IMPORTANT]
-> The expression inside `@if()`, `@elseif()`, `@foreach()`, `@for()`, `@while()` and `@forelse()` ends at the first `)`, so it can't contain parentheses of its own. `@if(count($posts) > 0)` doesn't work. Compute the value first, or use plain PHP for that line:
->
-> ```html
-> <?php if (count($posts) > 0): ?> ... <?php endif; ?>
-> ```
+Expressions can contain function calls, nested arrays and quoted strings:
+
+```html
+@if(count($posts) > 0)
+    @foreach(array_slice($posts, 0, 3) as $post)
+        <p>@lang('blog.by', ['name' => strtoupper($post['author'])])</p>
+    @endforeach
+@endif
+```
+
+> [!NOTE]
+> This needs flocms-core 2.2.2 or newer. In 2.2.1 the expression ended at the first `)`, so `@if(count($posts) > 0)` compiled to broken PHP, and `@forelse` didn't work.
 
 The engine replaces these words anywhere in a view or layout, also inside HTML comments and JavaScript. To show a literal `@` before one of them, write it as `&#64;`.
 
