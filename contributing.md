@@ -65,4 +65,4 @@ Every FloCMS package follows [semantic versioning](https://semver.org). The skel
 
 ## Improving these docs
 
-The documentation is written in Markdown. Found a mistake or something unclear? Tell us in an issue on [hostkurd/FloCMS](https://github.com/hostkurd/FloCMS/issues), and say which page it's on.
+The documentation lives in its own public repository, [hostkurd/flocms-docs](https://github.com/hostkurd/flocms-docs), with one branch per FloCMS version. Use the "Edit this page on GitHub" link at the bottom of any page, change the Markdown, and open a pull request. A check runs on every pull request and catches broken links. See the repository's README for how pages are written.

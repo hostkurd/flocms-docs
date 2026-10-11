@@ -1,0 +1,39 @@
+# FloCMS documentation
+
+The documentation of [FloCMS](https://github.com/hostkurd/FloCMS), the PHP framework by HostKurd, published at [flocms.com/docs](https://flocms.com/docs).
+
+## Branches
+
+Each FloCMS version has its own branch. The branch name is the version in the URL:
+
+| Branch | Published at |
+|---|---|
+| `1.7` | `flocms.com/docs/1.7/...` |
+
+Fix a mistake in the branch of the version it applies to. When a new version comes out, its branch starts as a copy of the previous one.
+
+## Contributing
+
+Found a mistake or something unclear? Edit the page on GitHub, using the "Edit this page" link on flocms.com or the pencil icon here, and open a pull request against the version's branch. For larger changes, open an issue first.
+
+Documentation describes what the code does. Check new statements against the source of the package they describe: [flocms-core](https://github.com/hostkurd/flocms-core), [flocms-cli](https://github.com/hostkurd/flocms-cli), [flocms-api](https://github.com/hostkurd/flocms-api), [flocms-uploader](https://github.com/hostkurd/flocms-uploader) or [flocms-captcha](https://github.com/hostkurd/flocms-captcha).
+
+## How pages are written
+
+- **One page per file.** `routing.md` is published at `/docs/{version}/routing`.
+- **The sidebar** is `documentation.md`: sections and pages, in order. Add every new page there.
+- **Links between pages** use the `{{version}}` placeholder, so they work in every version: `[routing](/docs/{{version}}/routing#parameters)`.
+- **Callouts** use GitHub's syntax: `> [!NOTE]`, `> [!TIP]`, `> [!IMPORTANT]`, `> [!WARNING]` and `> [!CAUTION]`.
+- **Headings** from `##` to `####` get anchors, and `##` and `###` appear in the page's "On this page" list.
+
+## Checking your changes
+
+Every pull request runs a check. It fails when a sidebar entry or link points to a missing page or heading, when a page is missing from the sidebar, or when a code block is never closed. Run it locally with PHP 8.1 or newer:
+
+```bash
+php .github/scripts/check-docs.php .
+```
+
+## License
+
+The documentation is released under the [MIT license](LICENSE).
