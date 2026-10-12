@@ -63,4 +63,5 @@
     - [A complete blog page](/docs/{{version}}/example-blog)
     - [A validated contact form](/docs/{{version}}/example-contact-form)
     - [A reusable theme](/docs/{{version}}/example-theme)
+    - [Build your own admin](/docs/{{version}}/example-admin)
 

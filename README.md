@@ -34,7 +34,7 @@ Every pull request runs a check. It fails when a sidebar entry or link points to
 php .github/scripts/check-docs.php .
 ```
 
-The [practical examples](examples.md) include complete files. Their CI check extracts those files from the Markdown and runs the blog, contact form and theme against Core 2.2.2 on PHP 8.1 and 8.3. It checks rendered output, escaping, empty states, form errors, CSRF rejection, theme fallback and URL subdirectories.
+The [practical examples](examples.md) include complete files. Their CI check extracts those files from the Markdown and runs the blog, contact form, theme and admin examples against Core 2.2.2 on PHP 8.1 and 8.3. It checks rendered output, escaping, empty states, form errors, CSRF rejection, theme fallback, URL subdirectories, and the admin example's permissions and role rules (on an SQLite `users` table).
 
 To run the example check locally, supply the path to a checkout of `hostkurd/flocms-core` at version 2.2.2:
 
