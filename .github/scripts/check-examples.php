@@ -171,6 +171,11 @@ PHP
     // The scenario driver supplies the constants normally defined by this file.
     writeFile($fixture . '/public/conf_global.php', "<?php\n");
     extractGuide('example-blog');
+    // The guide shows only the keys to add to the project's existing language file
+    $blogGuide = (string) file_get_contents($docs . '/example-blog.md');
+    check((bool) preg_match('/\*\*Add to \x60lang\/en\.php\x60:\*\*\s*\n\s*\x60{3}php\n(.*?)\n\x60{3}/s', $blogGuide, $langKeys), 'example-blog: language keys block not found');
+    writeFile($fixture . '/lang/en.php', "<?php\nreturn [\n    'lng.dir' => 'ltr',\n" . $langKeys[1] . "\n];\n");
+    command([PHP_BINARY, '-l', $fixture . '/lang/en.php']);
 
     $blog = request([]);
     check($blog['status'] === 200, 'Blog should return 200');

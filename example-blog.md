@@ -59,19 +59,15 @@ These records are objects, matching the shape returned by the core query builder
 
 ## Add the translations
 
-Merge these keys into the array returned by the existing `lang/en.php`; keep its other entries. The block shows a complete minimal language file for the demo.
+Open the existing `lang/en.php` and add these four keys inside the array it returns. Keep its other entries, such as `lng.dir` and the language names; the layout and the rest of the site use them.
 
-**File: `lang/en.php`**
+**Add to `lang/en.php`:**
 
 ```php
-<?php
-return [
-    'lng.dir' => 'ltr',
     'examples.site.name' => 'FloCMS Examples',
     'examples.blog.heading' => 'Latest posts',
     'examples.blog.empty' => 'No posts yet.',
     'examples.blog.author' => 'By :name',
-];
 ```
 
 Language files use flat keys. The translation helper `__()` returns a string and replaces `:name` from the supplied array.
