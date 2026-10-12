@@ -14,7 +14,7 @@ composer show hostkurd/flocms-core
 
 These examples target FloCMS 1.7 with **flocms-core 2.2.2 or newer**. They use the normal project's bootstrap, Composer autoloading, language files and page router. See [installation](/docs/{{version}}/installation).
 
-The examples use sample data and do not require a database. In this development project's `.env`, leave `DB_NAME` and `DB_USERNAME` empty. Keep `APP_DEBUG=true` while learning, and set:
+The first three examples use sample data and do not require a database; the admin guide uses the `users` table and explains its own setup. In this development project's `.env`, leave `DB_NAME` and `DB_USERNAME` empty. Keep `APP_DEBUG=true` while learning, and set:
 
 ```ini
 LANGUAGES=en
@@ -31,6 +31,7 @@ Create the demo layout in the blog guide before opening a page with `APP_TEMPLAT
 | [A complete blog page](/docs/{{version}}/example-blog) | A translated listing with sample records and an empty state | Controllers, object data, escaped output, loops, partials, layouts and CSS assets |
 | [A validated contact form](/docs/{{version}}/example-contact-form) | A form that validates input and redisplays values and errors | Requests, CSRF, core validation, explicit email checks and reusable error markup |
 | [A reusable theme](/docs/{{version}}/example-theme) | Shared navigation and a footer for the blog and contact pages | Theme selection, explicit partial data, layout scope, fallback and compiled templates |
+| [Build your own admin](/docs/{{version}}/example-admin) | A users page under `/admin` where administrators change names and roles | Admin actions, `$actionPermissions`, `Auth` role rules, CSRF forms, redirects after saving. Needs the database |
 
 Follow them in that order: the contact form and theme guide build on the blog's `demo` theme. The blog guide is complete on its own.
 

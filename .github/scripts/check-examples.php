@@ -134,7 +134,7 @@ $_GET = $scenario['query'] ?? [];
 $_POST = $scenario['post'] ?? [];
 $_FILES = [];
 $_COOKIE = [];
-$_SESSION = ['_csrf_token' => 'example-token'];
+$_SESSION = ['_csrf_token' => 'example-token'] + ($scenario['session'] ?? []);
 $_SERVER = [
     'REQUEST_METHOD' => $scenario['method'] ?? 'GET',
     'REQUEST_URI' => $prefix . ($scenario['path'] ?? '/blog'),
@@ -151,7 +151,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($scenario['csrf'] ?? true)) {
 \FloCMS\Core\Config::set('languages', ['en']);
 \FloCMS\Core\Config::set('default_language', 'en');
 \FloCMS\Core\Config::set('view.cache', $scenario['cache'] ?? true);
+if (isset($scenario['permissions'])) {
+    \FloCMS\Core\Config::set('permissions', $scenario['permissions']);
+    \FloCMS\Core\Config::set('roles', $scenario['roles']);
+}
+if (isset($scenario['database'])) {
+    \FloCMS\Core\App::$db = new \FloCMS\Core\Database(new PDO('sqlite:' . $scenario['database'], null, null, [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+    ]));
+}
 http_response_code(200);
+
+// Router::redirect() ends the request with exit: report on shutdown
+$finished = false;
+register_shutdown_function(static function () use (&$finished): void {
+    $html = (string) ob_get_clean();
+    echo json_encode([
+        'status' => http_response_code(),
+        'html' => $html,
+        'redirected' => !$finished,
+        'flash' => $_SESSION['__flash'] ?? null,
+    ], JSON_THROW_ON_ERROR);
+});
 
 ob_start();
 try {
@@ -164,8 +186,7 @@ try {
 } catch (\FloCMS\Core\HttpException $e) {
     http_response_code($e->status);
 }
-$html = ob_get_clean();
-echo json_encode(['status' => http_response_code(), 'html' => $html], JSON_THROW_ON_ERROR);
+$finished = true;
 PHP
     );
     // The scenario driver supplies the constants normally defined by this file.
@@ -253,6 +274,64 @@ PHP
     $fallback = request([]);
     check(str_contains($fallback['html'], '<footer class="site-footer">'), 'Default-theme partial fallback failed');
     rename($footer . '.bak', $footer);
+
+    // Build your own admin: a users page under /admin with the skeleton's role rules
+    writeFile($fixture . '/templates/default/layouts/admin.html', "<main><?= \$data['content'] ?></main>\n");
+    extractGuide('example-admin');
+    $database = $fixture . '/admin.sqlite';
+    $pdo = new PDO('sqlite:' . $database, null, null, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+    $pdo->exec('CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT, full_name VARCHAR(190) NOT NULL DEFAULT "",
+        email VARCHAR(190) NOT NULL, role TINYINT NOT NULL DEFAULT 0, status TINYINT NOT NULL DEFAULT 1)');
+    $insert = $pdo->prepare('INSERT INTO users (full_name, email, role) VALUES (?, ?, ?)');
+    foreach ([['Sara', 'sara@example.test', 1], ['Ali', 'ali@example.test', 2], ['Root', 'root@example.test', 3], ['<script>x</script>', 'x@example.test', 0]] as $row) {
+        $insert->execute($row);
+    }
+    $admin = function (array $scenario, int $role = 2, int $userId = 2) use ($database): array {
+        return request($scenario + [
+            'database' => $database,
+            'session' => ['admin_access' => true, 'isloggedin' => true, 'role' => $role, 'user_id' => $userId],
+            // The skeleton's defaults (config/config.php)
+            'permissions' => [0 => [], 1 => ['content.*'], 2 => ['content.*', 'users.manage', 'users.assign_role', 'settings.*'], 3 => ['*']],
+            'roles' => [0 => 'User', 1 => 'Editor', 2 => 'Admin', 3 => 'Super Admin'],
+        ]);
+    };
+    $user = static fn (int $id): array => $pdo->query('SELECT full_name, role FROM users WHERE id = ' . $id)->fetch(PDO::FETCH_ASSOC);
+
+    $list = $admin(['path' => '/admin/team']);
+    check($list['status'] === 200, 'Team list should return 200 for an Admin');
+    check(str_contains($list['html'], '<main>'), 'Admin pages use the admin layout');
+    check(str_contains($list['html'], '/admin/team/edit/1"'), 'Admin can edit the Editor');
+    check(str_contains($list['html'], '/admin/team/edit/4"'), 'Admin can edit a User');
+    check(!str_contains($list['html'], '/admin/team/edit/2"'), 'Nobody edits themselves');
+    check(!str_contains($list['html'], '/admin/team/edit/3"'), 'Admin cannot edit a Super Admin');
+    check(str_contains($list['html'], '&lt;script&gt;x&lt;/script&gt;') && !str_contains($list['html'], '<script>x'), 'User names must be escaped');
+    check($admin(['path' => '/admin/team'], 1, 1)['status'] === 403, 'Editors lack users.manage');
+    check($admin(['path' => '/admin/team/edit/3'])['status'] === 403, 'Editing a higher role must answer 403');
+    check($admin(['path' => '/admin/team/edit/2'])['status'] === 403, 'Editing yourself must answer 403');
+    check($admin(['path' => '/admin/team/edit/99'])['status'] === 404, 'Unknown user must answer 404');
+
+    $form = $admin(['path' => '/admin/team/edit/1']);
+    check($form['status'] === 200, 'Edit form should return 200');
+    check(str_contains($form['html'], 'name="_token" value="example-token"'), 'Edit form CSRF field missing');
+    check(str_contains($form['html'], '<option value="2">Admin</option>'), 'Roles up to your own are offered');
+    check(!str_contains($form['html'], 'Super Admin'), 'Roles above your own are not offered');
+    check(str_contains($form['html'], '<option value="1" selected>Editor</option>'), 'Current role is selected');
+
+    $forged = $admin(['path' => '/admin/team/edit/1', 'method' => 'POST', 'post' => ['full_name' => 'Sara', 'role' => '3']]);
+    check($forged['status'] === 422, 'A forged higher role must be refused');
+    check(str_contains($forged['html'], 'You cannot give a role higher than your own.'), 'Role error message missing');
+    check($user(1)['role'] === 1, 'A refused role must not be saved');
+    $invalid = $admin(['path' => '/admin/team/edit/1', 'method' => 'POST', 'post' => ['full_name' => '', 'role' => '1']]);
+    check($invalid['status'] === 422 && str_contains($invalid['html'], 'full_name is Required.'), 'Empty name must be refused');
+    check($admin(['path' => '/admin/team/edit/1', 'method' => 'POST', 'csrf' => false, 'post' => ['full_name' => 'X', 'role' => '0']])['status'] === 419, 'Edit without CSRF token must be refused');
+
+    $saved = $admin(['path' => '/admin/team/edit/1', 'method' => 'POST', 'post' => ['full_name' => 'Sara K', 'role' => '0']]);
+    check($saved['redirected'], 'A successful save redirects back to the list');
+    check(($saved['flash']['message'] ?? '') === 'Saved Sara K.', 'Save message missing');
+    check($user(1) === ['full_name' => 'Sara K', 'role' => 0], 'Name and role must be saved');
+
+    $super = $admin(['path' => '/admin/team'], 3, 3);
+    check(str_contains($super['html'], '/admin/team/edit/2"'), 'A Super Admin can edit an Admin');
 
     echo $checks . " example checks passed against the documented files.\n";
 } catch (Throwable $e) {
