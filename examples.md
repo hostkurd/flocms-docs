@@ -40,7 +40,7 @@ Start the development server after adding the files:
 php flo serve
 ```
 
-Use the address printed by the command, followed by `/blog` or `/contact`. If the project runs under a URL subdirectory, keep that prefix. No explicit API route registration is needed for these conventional page controllers.
+Use the address printed by the command, followed by `/blog` or `/contact`. If the project runs under a URL subdirectory, keep that prefix. These pages need no route registration: FloCMS maps `/blog` to `BlogController` and `/contact` to `ContactController` by convention.
 
 ## What these examples do
 

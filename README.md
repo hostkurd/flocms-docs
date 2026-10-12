@@ -42,7 +42,7 @@ To run the example check locally, supply the path to a checkout of `hostkurd/flo
 php .github/scripts/check-examples.php /path/to/flocms-core
 ```
 
-The checker creates a temporary application and does not modify your site. Keep the `**File: ...**` labels directly above each complete file's code block; the checker uses them to extract the actual documented code.
+The checker creates a temporary application and does not modify your site. Keep the `**File: ...**` labels directly above each complete file's code block; the checker uses them to extract the actual documented code. The blog guide's `**Add to `lang/en.php`:**` block is extracted the same way and wrapped in a language file.
 
 ## License
 
