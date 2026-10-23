@@ -4,6 +4,7 @@
     - [Contribution guide](/docs/{{version}}/contributing)
 - ## Getting started
     - [Installation](/docs/{{version}}/installation)
+    - [Choose what you build](/docs/{{version}}/setups)
     - [Configuration](/docs/{{version}}/configuration)
     - [Directory structure](/docs/{{version}}/structure)
     - [Deployment](/docs/{{version}}/deployment)

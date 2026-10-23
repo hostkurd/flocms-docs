@@ -20,6 +20,8 @@ cd my-site
 
 Composer installs the framework packages, copies `.env.example` to `.env`, creates the `storage` folders and generates a fresh `APP_KEY` for you.
 
+Then it asks what you are building: a website, an admin panel, an API, or a mix. It adds only the packages that choice needs. See [choose what you build](/docs/{{version}}/setups).
+
 > [!NOTE]
 > All five FloCMS packages, core, API, CLI, uploader and CAPTCHA, use exact version requirements, and `composer.lock` records the installed versions. Deploy with `composer install` to preserve them. See [framework and packages](/docs/{{version}}/packages#versions-in-this-guide) and the [upgrade guide](/docs/{{version}}/upgrade).
 
@@ -53,7 +55,7 @@ DB_USERNAME=root
 DB_PASSWORD=
 ```
 
-Run the migrations, which create the users table and the API tables, then create the first admin account:
+Run the migrations, which create the users table (and the tables of the admin panel and the API, when you added them), then create the first admin account:
 
 ```bash
 php flo migrate
