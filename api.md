@@ -1,6 +1,16 @@
 # Building an API
 
-FloCMS includes a JSON API runtime, `hostkurd/flocms-api`, already wired up in new projects. Routes are explicit and versioned, every response is JSON with security headers, and the pieces most APIs need are built in: authentication, validation, resources, pagination, CORS, rate limiting, OpenAPI documents and a test client.
+FloCMS includes a JSON API runtime, `hostkurd/flocms-api`. Choose an API setup when you create the project, or add it later:
+
+```bash
+composer require hostkurd/flocms-api
+php flo api:install
+php flo migrate
+```
+
+See [choose what you build](/docs/{{version}}/setups#add-an-api-later).
+
+Routes are explicit and versioned, every response is JSON with security headers, and the pieces most APIs need are built in: authentication, validation, resources, pagination, CORS, rate limiting, OpenAPI documents and a test client.
 
 It runs on ordinary shared hosting: PHP 8.1 or newer with PDO, mbstring and fileinfo. APCu is used for rate limits when it's available.
 
@@ -47,7 +57,7 @@ return static function (Router $router): void {
 };
 ```
 
-These are the routes of a new project. `GET /api/v1/users/5` runs `UsersController::show()` with `$id = 5`.
+These are the routes `php flo api:install` writes. `GET /api/v1/users/5` runs `UsersController::show()` with `$id = 5`.
 
 ### Methods
 
