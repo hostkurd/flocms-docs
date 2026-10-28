@@ -2,6 +2,33 @@
 
 FloCMS follows semantic versioning. All five FloCMS packages, core, API, CLI, uploader and CAPTCHA, use exact version requirements, and `composer.lock` records the installed versions. `composer install` preserves them. The full history is in the [changelog](https://github.com/hostkurd/FloCMS/blob/main/CHANGELOG.md).
 
+> [!NOTE]
+> These are the docs for FloCMS 1.7. Releases 1.8 and 2.0 are described in the [2.0 release notes](https://flocms.com/docs/2.0/releases).
+
+## 1.7.8
+
+Released October 12, 2026.
+
+- The admin layout loads its stylesheets and scripts with `template_asset()`, so the login page and dashboard are styled again. Existing sites: copy the five changed lines of `templates/default/layouts/admin.html`.
+
+## 1.7.7
+
+Released October 12, 2026. Requires core 2.3.0.
+
+- Packages can supply page controllers with `App::resolveControllersUsing()`. Your own controllers in `controllers/` always come first, and sites without resolvers behave exactly as before.
+
+## 1.7.6
+
+Released October 12, 2026. Requires core 2.2.3.
+
+- The `max` validation rule passes on a missing or empty value, so an empty required field shows only its "required" message. `min` is unchanged.
+
+Existing sites get both core releases with:
+
+```bash
+composer require hostkurd/flocms-core:2.3.0
+```
+
 ## 1.7.5
 
 Released October 11, 2026.
