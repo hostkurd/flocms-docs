@@ -139,7 +139,7 @@ App::fallbackUsing(static function (string $path, Request $request): ?Response {
 });
 ```
 
-Fallbacks are asked only on website URLs, never for `/admin` or the API, after CSRF and maintenance mode, and only when the URL would otherwise answer 404. Site controllers and resolvers always come first. When no fallback answers, the visitor gets the 404 page as before. Returning anything other than a `Response` or `null` is an error. `Router::getPath()` gives the same path anywhere in the request; `App::clearFallbacks()` removes them.
+Fallbacks are asked only on website URLs, never for `/admin` or the API, after CSRF and maintenance mode, and only when the URL would otherwise answer 404. Site controllers and resolvers always come first. When no fallback answers, the visitor gets the 404 page as before. Returning anything other than a `Response` or `null` is an error. `App::getRouter()->getPath()` gives the same path anywhere in the request; `App::clearFallbacks()` removes them.
 
 flocms-admin's Pages use this hook.
 

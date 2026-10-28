@@ -33,6 +33,7 @@ php flo migrate
 php flo db:check
 ```
 
+- The file's folder must exist and be writable by PHP and the web server, since SQLite also writes a journal file next to it.
 - The website connection never creates the file. When it is missing, the page says so and names `DB_NAME`, so a typo can't look like an empty site.
 - Foreign keys are switched on, and a write waits up to 5 seconds for another one to finish.
 - Each migration's SQL must also work on SQLite. The migration helpers `id()` and `tableOptions()` adapt to MySQL and SQLite; application and package migrations may still contain engine-specific SQL. See [migrations](/docs/{{version}}/migrations).
