@@ -43,8 +43,6 @@ FloCMS shows every step before it runs it and asks "Go ahead?". For API + admin 
 - **The example pages** (the welcome page and the `dark` example template) are removed for the admin-only and API setups, and only while they are still the skeleton's own files. A file you changed is kept, and setup names it.
 - **Two settings** are written, both plain lines you can change later: `home` in `config/config.php` and, with the admin panel, `site_link` in `config/admin.php`.
 
-Going back to a website, for example from admin panel only to website + admin panel, writes a simple `views/pages/index.html` when an earlier setup removed the welcome page.
-
 If a command fails, setup stops and says so. Fix the problem and run `php flo setup` again: the installers only add what is missing.
 
 ## Running setup yourself
@@ -56,9 +54,6 @@ php flo setup --as=api-admin --dry-run # print the plan, change nothing
 ```
 
 Without a terminal, for example `composer create-project -n`, a CI job or a host's one-click installer, setup changes nothing, so the project is **website only**. Run `php flo setup` later, or pass `--as` in your script.
-
-> [!IMPORTANT]
-> On Windows, Composer gives its scripts no terminal, so the question isn't asked during `create-project`. Run it as a second step: `cd my-site`, then `php flo setup`.
 
 > [!NOTE]
 > Setup only adds. Going from website to website + admin, or from admin panel to API + admin panel, is fine. When a package you have isn't part of the setup you choose, setup leaves it installed and prints the steps to remove it yourself, because it can't know what you built on it.
