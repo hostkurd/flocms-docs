@@ -127,6 +127,9 @@ If you're on 1.7.3 or older, also follow the 1.7.4 steps below.
 - Run `php flo view:clear` so templates are compiled again.
 - Read the [release notes](/docs/{{version}}/releases) for what changed.
 
+> [!STUDIO]
+> The project's **Packages** tab shows the installed versions and the updates, with a link to each changelog. **Review update** shows the commands before Studio runs them, and the **Doctor** tab checks the result. See [packages and updates in Studio](/docs/studio/packages#update-a-package).
+
 ## Moving older API code
 
 `FloCMS\Core\Api` and `FloCMS\Core\ApiController` are deprecated. The API package also supplies `FloCMS\Api\Legacy\LegacyApiController` as a compatibility bridge, but new endpoints should use `FloCMS\Api\Controller`.

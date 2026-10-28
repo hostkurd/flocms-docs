@@ -39,6 +39,9 @@ php flo db:seed                          # runs DatabaseSeeder
 php flo db:seed --class=CategoriesSeeder # runs one seeder
 ```
 
+> [!STUDIO]
+> Click **Seed…** in the project's **Database** tab to run `DatabaseSeeder`. See [migrations and seeding in Studio](/docs/studio/migrations#seed-the-database).
+
 On `APP_ENV=production`, `db:seed` asks before it runs; add `--force` in scripts.
 
 Seeders also run after migrations with `--seed`:

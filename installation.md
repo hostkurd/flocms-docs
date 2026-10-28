@@ -22,6 +22,9 @@ Composer installs the framework packages, copies `.env.example` to `.env`, creat
 
 Then it asks what you are building: a website, an admin panel, an API, or a mix. It adds only the packages that choice needs. See [choose what you build](/docs/{{version}}/setups).
 
+> [!STUDIO]
+> Click **New project**, pick a folder and what you are building, and Studio runs `create-project` and the setup for you. It also downloads PHP, Composer and MariaDB when you don't have them. See [your first project in Studio](/docs/studio/first-project).
+
 > [!NOTE]
 > `composer.lock` records the exact versions of the FloCMS packages a project installs. Deploy with `composer install` to preserve them, and change versions deliberately with `composer update`. See [framework and packages](/docs/{{version}}/packages#versions-in-this-guide) and the [upgrade guide](/docs/{{version}}/upgrade).
 
@@ -33,6 +36,9 @@ Use the built-in server while you develop, then open the address it prints:
 php flo serve
 ```
 
+> [!STUDIO]
+> Click **Start server** on the project page. Studio runs `php flo serve` and shows the address, and the **Logs** tab shows what the server prints. See [the server and the database](/docs/studio/server-and-database).
+
 If `APP_URL` in `.env` doesn't match the address you opened, the welcome page tells you, and on a local install it offers a button that writes the right URL to `.env`.
 
 ## Check your installation
@@ -42,6 +48,9 @@ If `APP_URL` in `.env` doesn't match the address you opened, the welcome page te
 ```bash
 php flo doctor
 ```
+
+> [!STUDIO]
+> The project's **Doctor** tab shows these checks, and the admin panel's, each with what to do about it. Studio runs them when you open the project. See [Doctor in Studio](/docs/studio/doctor).
 
 ## Database and first admin
 
@@ -63,6 +72,9 @@ php flo user:create --role=super-admin
 ```
 
 `user:create` asks for the name, email and password. The password is hidden and asked twice. Log in at `/admin/users/login`.
+
+> [!STUDIO]
+> A new project in Studio can make the database on Studio's own MariaDB, run the migrations and create the first admin in one go: fill in the **Database** and **First admin** steps. See [your first project in Studio](/docs/studio/first-project#step-2-database).
 
 ## Next steps
 
