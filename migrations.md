@@ -12,6 +12,9 @@ Migrations use the database in `.env`. See [database](/docs/{{version}}/database
 php flo make:migration create_posts_table
 ```
 
+> [!STUDIO]
+> Open the **Generate** tab and choose **Migration**. Studio shows the command and the file before it writes it. See [generators in Studio](/docs/studio/generators#migration).
+
 creates `database/migrations/<timestamp>_create_posts_table.php`. A name like `create_posts_table` gives you a `CREATE TABLE` template for `posts`; `--create=posts` does the same for any name, and `--table=posts` gives an `ALTER TABLE` template for changing an existing table. The file name, without `.php`, is the migration's ID, and the timestamp keeps files in order.
 
 A migration returns an object with `up()`, which makes the change, and `down()`, which undoes it:
@@ -56,6 +59,9 @@ php flo migrate:status       # what ran, what's pending, changed or missing
 php flo migrate:rollback     # undo the last batch
 php flo migrate:fresh --seed # drop all tables, migrate again, then seed
 ```
+
+> [!STUDIO]
+> Open the project's **Database** tab: it lists every migration with its status and every table with its row count, and runs, rolls back and seeds with one click. Studio asks before it changes data, and on a production site before every change. See [migrations and seeding in Studio](/docs/studio/migrations).
 
 - Migrations run in file-name order, in numbered batches. Each one is recorded in the `migrations` table with a checksum, so `migrate:status` notices edited or missing files.
 - Only one `migrate` runs at a time.

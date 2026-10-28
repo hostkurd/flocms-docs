@@ -2,6 +2,9 @@
 
 `php flo` is the FloCMS command line. It creates code, runs migrations, manages users and checks your installation. Every command comes from Composer packages, so `composer update` brings new commands and fixes.
 
+> [!STUDIO]
+> [FloCMS Studio](https://flocms.com/studio), the desktop app, runs the most used of these commands from buttons and shows each one before it runs. [Studio and the command line](/docs/studio/command-line) lists which button runs which command.
+
 ## Getting help
 
 ```bash

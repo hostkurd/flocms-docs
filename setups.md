@@ -55,6 +55,9 @@ php flo setup --as=admin               # site-admin, site, admin, api-admin or a
 php flo setup --as=api-admin --dry-run # print the plan, change nothing
 ```
 
+> [!STUDIO]
+> Choose under **What are you building?** when you start a **New project**: Studio runs `php flo setup --as=` with your choice. See [your first project in Studio](/docs/studio/first-project#step-1-project).
+
 Without a terminal, for example `composer create-project -n`, a CI job or a host's one-click installer, setup changes nothing, so the project is **website only**. Run `php flo setup` later, or pass `--as` in your script.
 
 > [!IMPORTANT]
@@ -104,6 +107,9 @@ composer require hostkurd/flocms-admin
 php flo admin:install
 php flo migrate
 ```
+
+> [!STUDIO]
+> Open the project's **Packages** tab and click **Add** next to **Add the admin panel** or **Add the API**. Studio shows the commands first. See [packages and updates in Studio](/docs/studio/packages#add-the-admin-panel-or-the-api).
 
 ## Add an API later
 

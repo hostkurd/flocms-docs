@@ -11,7 +11,7 @@ Each FloCMS version has its own branch. The branch name is the version in the UR
 | `2.0` | `flocms.com/docs/2.0/...` (the default) |
 | `1.7` | `flocms.com/docs/1.7/...` |
 
-Fix a mistake in the branch of the version it applies to. The admin panel's guides are not here: they live in the [flocms-admin](https://github.com/hostkurd/flocms-admin) repository's `docs/` folder and are published at `flocms.com/docs/admin/...`, so link to them as `/docs/admin` (the check accepts that address). When a new version comes out, its branch starts as a copy of the previous one.
+Fix a mistake in the branch of the version it applies to. The admin panel's guides are not here: they live in the [flocms-admin](https://github.com/hostkurd/flocms-admin) repository's `docs/` folder and are published at `flocms.com/docs/admin/...`, so link to them as `/docs/admin` (the check accepts that address, and `/docs/studio` for the Studio guide). When a new version comes out, its branch starts as a copy of the previous one.
 
 ## Contributing
 
@@ -24,7 +24,7 @@ Documentation describes what the code does. Check new statements against the sou
 - **One page per file.** `routing.md` is published at `/docs/{version}/routing`.
 - **The sidebar** is `documentation.md`: sections and pages, in order. Add every new page there.
 - **Links between pages** use the `{{version}}` placeholder, so they work in every version: `[routing](/docs/{{version}}/routing#parameters)`.
-- **Callouts** use GitHub's syntax: `> [!NOTE]`, `> [!TIP]`, `> [!IMPORTANT]`, `> [!WARNING]` and `> [!CAUTION]`.
+- **Callouts** use GitHub's syntax: `> [!NOTE]`, `> [!TIP]`, `> [!IMPORTANT]`, `> [!WARNING]` and `> [!CAUTION]`. `> [!STUDIO]` says how to do the same in [FloCMS Studio](https://flocms.com/studio), the desktop app, and links to its guide as `/docs/studio/<page>` (GitHub shows it as a plain quote).
 - **Headings** from `##` to `####` get anchors, and `##` and `###` appear in the page's "On this page" list.
 
 ## Checking your changes

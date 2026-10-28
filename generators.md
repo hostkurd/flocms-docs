@@ -2,6 +2,9 @@
 
 Generators write the files every new feature starts with: a controller, a model, a view, a migration. They follow FloCMS conventions, so the files work as soon as they're created.
 
+> [!STUDIO]
+> The project's **Generate** tab runs `make:controller`, `make:migration` and the admin panel's generators from a form, and shows the command and a preview of the files first. See [generators in Studio](/docs/studio/generators).
+
 ## A page in one command
 
 ```bash
