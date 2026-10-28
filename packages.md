@@ -1,34 +1,41 @@
 # Framework and packages
 
-FloCMS has an application skeleton and five Composer packages. The skeleton gives you a ready-to-run project; the packages provide the runtime and tools that project uses.
+FloCMS has an application skeleton and a set of Composer packages. The skeleton gives you a ready-to-run project; the packages provide the runtime and tools that project uses. A project installs the four framework packages, and adds the admin panel and the API when it needs them.
 
 ## Versions in this guide
 
-These pages describe the FloCMS 1.7.5 skeleton and these package versions:
+These pages describe the FloCMS 2.0 skeleton. A new project installs these versions:
 
 | Package | Version | Responsibility |
 |---|---|---|
-| `hostkurd/flocms-core` | `2.2.2` | Page routing, controllers, models, database access, templates, configuration, authentication, HTTP classes, the service container and modules |
-| `hostkurd/flocms-api` | `1.2.0` | Explicit API routes, middleware, JSON responses, authentication, resources, pagination, idempotency, OpenAPI and API testing |
+| `hostkurd/flocms-core` | `2.8.0` (2.9.0 with `composer update`) | Page routing, controllers, models, database access, templates, configuration, authentication, rate limits, HTTP classes, the service container and modules |
 | `hostkurd/flocms-cli` | `2.0.1` | `php flo`, code generators, migrations, seeders, scheduling, maintenance and project inspection |
-| `hostkurd/flocms-uploader` | `1.2.0` | File validation, storage disks, image versions, videos and resumable uploads |
+| `hostkurd/flocms-uploader` | `1.2.1` | File validation, storage disks, image versions, videos and resumable uploads |
 | `hostkurd/flocms-captcha` | `1.1.0` | Session-backed, single-use image challenges and custom renderers |
 
-The skeleton requires exact versions of all five packages; CAPTCHA was pinned exactly in 1.7.5, before that it used `^1.0`. `composer.lock` records the exact installed versions; deploy with `composer install` to keep them. See [upgrading](/docs/{{version}}/upgrade).
+Optional packages, added by [choose what you build](/docs/{{version}}/setups) or with `composer require`:
 
-The framework version and package versions are separate. FloCMS 1.7.5 uses core 2.2.2; a module's own `version` is separate again.
+| Package | Version | Responsibility |
+|---|---|---|
+| `hostkurd/flocms-admin` | `0.39` | The [admin panel](/docs/{{version}}/admin-panel): dashboard, users, settings, media, pages and your own resources |
+| `hostkurd/flocms-api` | `1.3.0` | Explicit API routes, middleware, JSON responses, authentication, resources, pagination, idempotency, OpenAPI and API testing |
+| `hostkurd/flocms-reactive` | `0.5.1` | Server-rendered interactive components; the admin panel uses it |
+
+`composer.json` requires the framework packages with caret ranges from a tested minimum (`"hostkurd/flocms-core": "^2.8.0"`), and `composer.lock` records the exact installed versions. Deploy with `composer install` to keep them; a site changes versions only when you run `composer update`. The ranges let a package you add, such as the admin panel, bring a newer release it needs. See [upgrading](/docs/{{version}}/upgrade).
+
+The skeleton's version and the package versions are separate. FloCMS 2.0 uses core 2.8 or newer; a module's own `version` is separate again.
 
 ## What the skeleton sets up
 
-`composer create-project hostkurd/flocms my-site` installs all five packages and supplies:
+`composer create-project hostkurd/flocms my-site` installs the framework packages and supplies:
 
 - `public/index.php`, bootstrap files, page controllers, models, views and layouts
-- `public/api.php` and `api/routes.php`, including the global middleware and authentication aliases
 - the `flo` launcher, application migrations, sample commands and scheduled tasks
-- admin login, user management, login throttling and role configuration
+- admin login, login throttling, the `users` table and role configuration
+- `php flo setup`, which adds the admin panel or the API (`commands/SetupCommand.php`)
 - PHPUnit configuration and application testing helpers
 
-The skeleton supplies application behavior, such as the login controller and its throttle. Installing core alone does not create those files. Follow the [request lifecycle](/docs/{{version}}/lifecycle) to see how they connect.
+The skeleton supplies application behavior, such as the login controller and its throttle. Installing core alone does not create those files. Follow the [request lifecycle](/docs/{{version}}/lifecycle) to see how they connect. Packages extend a project through the hooks described in [extending from a package](/docs/{{version}}/extending).
 
 ## Features you configure yourself
 
@@ -55,9 +62,9 @@ The CLI's project commands expect a FloCMS project layout and environment. Its c
 
 ## Runtime requirements
 
-The skeleton needs PHP 8.1 or newer. Enable PDO and `pdo_mysql` for MySQL/MariaDB, `fileinfo` for upload validation, and GD or Imagick for image processing. CAPTCHA's default renderer needs GD. S3 storage additionally needs `aws/aws-sdk-php`.
+The skeleton needs PHP 8.1 or newer. Enable PDO and `pdo_mysql` for MySQL/MariaDB (or `pdo_sqlite` for SQLite), `fileinfo` for upload validation, and GD or Imagick for image processing. CAPTCHA's default renderer needs GD. S3 storage additionally needs `aws/aws-sdk-php`.
 
-The bundled web database connection and module database implementations use MySQL/MariaDB. Application CLI migrations can also use SQLite; that does not make the web connection or module migration ledger SQLite-compatible. See [database](/docs/{{version}}/database).
+The website connection uses MySQL/MariaDB, or SQLite with core 2.9 or newer. The module database implementations use MySQL/MariaDB only. See [database](/docs/{{version}}/database).
 
 ## Older API code
 

@@ -120,7 +120,7 @@ foreach ($bodies as $page => $body) {
                 $errors[] = "$where: link to missing heading \"$target#$anchor\"";
             }
         }
-        if (preg_match('#\]\(/docs/(?!\{\{version\}\})#', (string) $line)) {
+        if (preg_match('#\]\(/docs/(?!\{\{version\}\}|admin[/)\#])#', (string) $line)) {
             $errors[] = "$page.md:" . ($number + 1) . ': /docs link without {{version}}';
         }
     }

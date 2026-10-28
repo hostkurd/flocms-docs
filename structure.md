@@ -1,6 +1,6 @@
 # Directory structure
 
-The skeleton installs five Composer packages. See [framework and packages](/docs/{{version}}/packages) for their responsibilities and versions. Applications that enable modules also add the module layout described in [modules](/docs/{{version}}/modules#creating-a-module).
+The skeleton installs the four framework packages, and the admin panel or the API when you choose them. See [framework and packages](/docs/{{version}}/packages) for their responsibilities and versions. Applications that enable modules also add the module layout described in [modules](/docs/{{version}}/modules#creating-a-module).
 
 A new FloCMS project is small. Here is what each folder is for. To see how these pieces work together on a request, read the [request lifecycle](/docs/{{version}}/lifecycle).
 
@@ -8,15 +8,16 @@ A new FloCMS project is small. Here is what each folder is for. To see how these
 
 ```text
 my-site/
-├── api/            JSON API: routes.php, Controllers/, Resources/
-├── commands/       Your own php flo commands (App\Commands)
+├── admin/          Admin panel resources and pages, when you added the panel
+├── api/            JSON API: routes.php, Controllers/, Resources/ (php flo api:install)
+├── commands/       Your own php flo commands (App\Commands), including SetupCommand
 ├── config/         config.php, schedule.php and bootstrap.php
 ├── controllers/    Page controllers (FloCMS\Controllers)
 ├── database/       migrations/ and seeders/
 ├── includes/       Startup helpers: maintenance mode, class aliases (compat.php)
 ├── lang/           Translations: en.php, ar.php, ku.php
 ├── models/         Models (FloCMS\Models)
-├── public/         The web root: index.php, api.php, themes/, uploads/
+├── public/         The web root: index.php, themes/, uploads/ (and api.php with the API)
 ├── storage/        Logs, cache and framework state (not in Git)
 ├── support/        Application classes such as LoginThrottle (FloCMS\Support)
 ├── templates/      Layouts, partials and error pages per template
@@ -24,7 +25,7 @@ my-site/
 ├── vendor/         Composer packages (not in Git)
 ├── views/          One folder of views per controller
 ├── .env            Your environment settings (not in Git)
-├── composer.json   Packages, pinned to exact versions
+├── composer.json   Packages, with version ranges (composer.lock has the exact ones)
 └── flo             The command-line launcher: php flo
 ```
 
@@ -33,7 +34,7 @@ my-site/
 `public/` is the only folder the web server should serve. Point your domain's document root at it.
 
 - `index.php` handles every page request.
-- `api.php` handles `/api/v1/...` requests.
+- `api.php` handles `/api/v1/...` requests, once `php flo api:install` has written it. See [building an API](/docs/{{version}}/api).
 - `conf_global.php` defines constants every request uses, such as `ACTIVE_LANG` and `VIEWS_PATH`.
 - `themes/<template>/` holds CSS, JavaScript, images and fonts. In templates, link to them with `template_asset('css/style.css')`.
 - `uploads/` receives uploaded files.

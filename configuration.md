@@ -20,7 +20,7 @@ FloCMS reads environment-specific values from `.env` and keeps application setti
 | `PRIMARY_EMAIL` | The sender address of emails the site sends |
 | `LANGUAGES`, `DEFAULT_LANG` | Enabled languages, e.g. `en,ar,ku`, and the default one. See [localization](/docs/{{version}}/localization). |
 | `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USERNAME`, `DB_PASSWORD`, `DB_CHARSET` | MySQL/MariaDB website connection. Leave `DB_NAME` empty until the database exists. See [database](/docs/{{version}}/database). |
-| `DB_TYPE` | CLI only: `mysql` (default), `mariadb`, or `sqlite`. Does not change the website connection. See [supported databases](/docs/{{version}}/database#supported-databases). |
+| `DB_TYPE` | `mysql` (default), `mariadb`, or `sqlite`. The website follows it since core 2.9; before, only `php flo` did. See [supported databases](/docs/{{version}}/database#supported-databases). |
 | `DB_DSN` | CLI only: an explicit PDO DSN, overriding `DB_TYPE`. Other drivers are not fully supported by the query builder and migration tools. See [supported databases](/docs/{{version}}/database#supported-databases). |
 | `TRUSTED_PROXIES` | Reverse proxies (IPs or CIDR ranges) whose `X-Forwarded-For` header is trusted |
 | `API_CORS_ORIGINS` | Origins allowed to call the API, comma separated. `https://*.example.com` patterns work. |
@@ -88,4 +88,4 @@ Uploads use a separate array loaded from `config/upload.php`. Modules need expli
 
 ## Settings stored in the database
 
-`Config::getSetting('name')` reads a value from a `settings` table (columns `param`, `lang` and `value`) for the current language. It returns the default you pass, or `false`, when there is no database or no such table. The skeleton doesn't create this table; maintenance mode uses it for the `offline_mode` setting when it exists.
+`Config::getSetting('name')` reads a value from a `settings` table (columns `param`, `lang` and `value`) for the current language. It returns the default you pass, or `false`, when there is no database or no such table. The skeleton's migrations create this table (since 1.8.5; older sites can copy `database/migrations/2026_10_17_000000_create_settings_table.php`). `php flo down` and `up` write the `offline_mode` setting there, and the admin panel's settings pages store their values in the same table.

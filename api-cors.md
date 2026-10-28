@@ -76,7 +76,7 @@ $limiters = new RateLimiterRegistry($rateLimitStore, $clientIp, [
 
 ### Where counters are kept
 
-Counters live in APCu when the server has it, and otherwise in files under `storage/cache/api-rate-limit`. File counters clean up after themselves on about 1 in 100 requests; `php flo api:gc` removes stale ones on demand, and the [scheduler](/docs/{{version}}/scheduler) runs it daily.
+Counters live in APCu when the server has it, and otherwise in files under `storage/cache/api-rate-limit`. The limiters are core classes since core 2.8 (`FloCMS\Core\RateLimit\FileRateLimiter` and `ApcuRateLimiter`, with `FloCMS\Core\Security\ClientIpResolver` for the client IP), so the website's login throttle uses them too. flocms-api 1.3 keeps the old `FloCMS\Api\RateLimit\…` and `FloCMS\Api\Security\…` names as deprecated aliases. File counters clean up after themselves on about 1 in 100 requests; `php flo api:gc` removes stale ones on demand, and the [scheduler](/docs/{{version}}/scheduler) runs it daily.
 
 ## Client IPs behind a proxy
 

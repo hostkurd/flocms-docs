@@ -81,7 +81,7 @@ try {
 | `min:n`, `max:n` | See below |
 | `in:a,b,c` | The value is one of the listed values |
 
-**`min` and `max`** compare the value as a number when the field also has `integer` or `numeric`: `integer|min:1000` for a price. Otherwise they count characters, so `min:4|max:4` accepts a PIN like `"0123"`, and for arrays they count items.
+**`min` and `max`** compare the value as a number when the field also has `integer` or `numeric`: `integer|min:1000` for a price. Otherwise they count characters, so `min:4|max:4` accepts a PIN like `"0123"`, and for arrays they count items. `max` passes on a missing or empty value (core 2.2.3 and newer), so an empty field only gets the `required` message; `min` still fails on an empty value.
 
 > [!IMPORTANT]
 > Every rule of a field runs, even when the field is missing. `'phone' => 'string'` fails when there is no phone, so only add rules for optional fields when they were sent. The messages are in English and use the field name.
@@ -118,7 +118,7 @@ In the view, print the errors next to the fields, and the old values back into t
 
 ## More rules
 
-The API package, installed on every FloCMS site, has a larger validator: `email`, `url`, `bool`, `array`, `date`, `between`, `regex`, `nullable`, `sometimes`, `exists` and `unique` on top of the rules above. It returns only the validated fields, with integers and booleans already converted, and works on plain arrays in page controllers too:
+The API package ([flocms-api](/docs/{{version}}/api), when you added it) has a larger validator: `email`, `url`, `bool`, `array`, `date`, `between`, `regex`, `nullable`, `sometimes`, `exists` and `unique` on top of the rules above. It returns only the validated fields, with integers and booleans already converted, and works on plain arrays in page controllers too:
 
 ```php
 use FloCMS\Api\Validation\Validator;
