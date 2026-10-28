@@ -108,6 +108,22 @@ Router::redirect(SITE_URI . '/admin/blog');
 
 In the view, `Session::hasFlash()`, `Session::flash()` and `Session::flashType()` print it. See [sessions](/docs/{{version}}/session#flash-messages).
 
+## Returning JSON or a fragment
+
+An action can return a `FloCMS\Core\Http\Response` instead of rendering a view (core 2.3.2 and newer):
+
+```php
+use FloCMS\Core\Auth;
+use FloCMS\Core\Http\Response;
+
+public function admin_status(): Response
+{
+    return Response::json(['status' => 'ok', 'role' => Auth::role()]);
+}
+```
+
+The response is sent without a view or layout, after the usual login, permission and CSRF checks. See [extending from a package](/docs/{{version}}/extending#returning-a-response).
+
 ## Not found and forbidden
 
 Throw an `HttpException` to stop the action and show an error page:

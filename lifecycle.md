@@ -23,7 +23,7 @@ Browser
   → Response sent
 ```
 
-API requests take a different path, through `public/api.php`. See [API requests](#api-requests) below.
+When the project has the API, API requests take a different path, through `public/api.php`. See [API requests](#api-requests) below.
 
 ## 1. The entry point
 
@@ -76,7 +76,7 @@ The router's controller name becomes a class: `blog-post` and `blog_post` both b
 3. The action is a public, non-static method on your controller or your own base controller, excluding methods declared by `FloCMS\Core\Controller` and magic method names.
 4. The current user has the permission that `$actionPermissions` requires for it (403 otherwise).
 
-A failed name, class or method check answers 404, and a class that doesn't extend `Controller` is a 500 error. Then your action runs. See [controllers](/docs/{{version}}/controllers).
+When the site has no such class, packages are asked for one ([controller resolvers](/docs/{{version}}/extending#controllers-from-a-package)), and on website URLs, when nothing answers, [fallbacks](/docs/{{version}}/extending#public-addresses-from-a-package) may answer before the 404. A failed name, class or method check answers 404, and a class that doesn't extend `Controller` is a 500 error. Then your action runs. See [controllers](/docs/{{version}}/controllers).
 
 > [!NOTE]
 > The controller's constructor runs before the action is checked. Keep constructors light, and create models on first use, as generated controllers do.

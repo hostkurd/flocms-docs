@@ -1,47 +1,46 @@
 # Database
 
-FloCMS sites use MySQL or MariaDB. A site doesn't need a database to run: the welcome page, static pages and the documentation you're reading work without one. You add a database when your site stores data.
+FloCMS sites use MySQL, MariaDB or, since core 2.9, SQLite. A site doesn't need a database to run: the welcome page, static pages and the documentation you're reading work without one. You add a database when your site stores data.
 
 ## Supported databases
 
-Database support differs between the website connection and the command-line tools:
-
 | Database | Website connection (`App::db()`) | CLI connection (`php flo`) |
 |---|---|---|
-| MySQL | Supported through `pdo_mysql` | Supported; the default `DB_TYPE` |
+| MySQL | Supported through `pdo_mysql`; the default | Supported; the default `DB_TYPE` |
 | MariaDB | Supported through the MySQL driver (`pdo_mysql`) | Supported with `DB_TYPE=mysql` or `DB_TYPE=mariadb` |
-| SQLite | Not configurable through the standard website connection | Supported with `DB_TYPE=sqlite` and `pdo_sqlite`; migrations must use compatible SQL |
-| PostgreSQL and other engines | Not configurable through the standard website connection | A custom `DB_DSN` can open a PDO connection, but this does not provide full query-builder or migration support |
+| SQLite | Supported with `DB_TYPE=sqlite` and `pdo_sqlite`, core 2.9 or newer | Supported with `DB_TYPE=sqlite` and `pdo_sqlite` |
+| PostgreSQL and other engines | Not supported | A custom `DB_DSN` can open a PDO connection, but this does not provide full query-builder or migration support |
 
-The website connection always builds a MySQL DSN. Setting `DB_TYPE=sqlite` or `DB_DSN` in `.env` does **not** switch `App::db()`, models, or API controllers that use that connection to SQLite or another engine.
-
-The shared `Database` class wraps a PDO connection and can be constructed directly with SQLite PDO in custom code or tests. This is separate from the standard website setup. The query builder uses backtick-quoted identifiers, and the CLI migration tools contain MySQL/SQLite-specific SQL, so PDO connectivity alone does not make PostgreSQL or another engine fully supported.
+The query builder uses backtick-quoted identifiers, which MySQL, MariaDB and SQLite all accept. PDO connectivity alone does not make PostgreSQL or another engine supported.
 
 ### MySQL and MariaDB
 
-Use MySQL or MariaDB for a standard FloCMS website. Both use the same connection settings below and require PHP's `pdo_mysql` extension. MariaDB does not need a separate PDO driver.
+Use MySQL or MariaDB for most websites, and on shared hosting such as cPanel. Both use the same connection settings below and require PHP's `pdo_mysql` extension. MariaDB does not need a separate PDO driver.
 
-### SQLite for command-line use
+### SQLite
 
-For a separate CLI project or test setup, configure:
+SQLite keeps the whole database in one file. It suits small sites, local development and tests. Set:
 
 ```ini
 DB_TYPE=sqlite
 DB_NAME=storage/database.sqlite
-DB_USERNAME=
-DB_PASSWORD=
 ```
 
-The database file path is relative to the project root unless it is absolute. Its parent directory must already exist and be writable, and PHP must have `pdo_sqlite` enabled. SQLite does not use `DB_HOST`, `DB_PORT`, a username, or a password.
+`DB_NAME` is the file, relative to the project root unless it is a full path. SQLite doesn't use `DB_HOST`, `DB_PORT`, a username or a password, and PHP needs `pdo_sqlite`. Create the file with the migrations:
 
 ```bash
+php flo migrate
 php flo db:check
 ```
 
-The CLI migration runner supports SQLite, but each migration's SQL must also work on SQLite. The migration helpers `id()` and `tableOptions()` adapt to MySQL and SQLite; application and package migrations may still contain engine-specific SQL. See [migrations](/docs/{{version}}/migrations).
+- The file's folder must exist and be writable by PHP and the web server, since SQLite also writes a journal file next to it.
+- The website connection never creates the file. When it is missing, the page says so and names `DB_NAME`, so a typo can't look like an empty site.
+- Foreign keys are switched on, and a write waits up to 5 seconds for another one to finish.
+- Each migration's SQL must also work on SQLite. The migration helpers `id()` and `tableOptions()` adapt to MySQL and SQLite; application and package migrations may still contain engine-specific SQL. See [migrations](/docs/{{version}}/migrations).
+- Keep the file out of the web root. `storage/` is a good place: the web server serves only `public/`.
 
 > [!IMPORTANT]
-> These SQLite settings apply to the CLI only. Keep a website's `.env` configured for MySQL or MariaDB when its pages or API use `App::db()`.
+> With core 2.8 or older, these settings apply to `php flo` only, and the website keeps connecting to MySQL. Run `composer update hostkurd/flocms-core` to get 2.9.
 
 ## Configuration
 
@@ -64,10 +63,10 @@ DB_CHARSET=utf8mb4
 | `DB_USERNAME`, `DB_PASSWORD` | empty | |
 | `DB_CHARSET` | `utf8mb4` | Full Unicode, including Arabic, Kurdish and emoji |
 
-`config/config.php` copies these into the `db.*` settings, which the connection reads. While `DB_NAME` or `DB_USERNAME` is empty, the site runs without a database.
+`config/config.php` copies these into the `db.*` settings, which the connection reads. While `DB_NAME` or `DB_USERNAME` is empty, the site runs without a database. With SQLite, only `DB_NAME` is needed.
 
 > [!NOTE]
-> `DB_TYPE` and `DB_DSN` are read by the CLI connection factory, not by `App::db()`. A custom `DB_DSN` takes precedence over `DB_TYPE` for CLI connections and requires the corresponding PDO extension. It does not guarantee that CLI database commands, the query builder, or migrations work with that engine.
+> `App::db()` reads `DB_TYPE` (or `db.type`) since core 2.9; any value other than `sqlite` means MySQL. `DB_DSN` is read by the CLI connection factory only. A custom `DB_DSN` takes precedence over `DB_TYPE` for CLI connections and requires the corresponding PDO extension. It does not guarantee that CLI database commands, the query builder, or migrations work with that engine.
 
 ## The connection
 

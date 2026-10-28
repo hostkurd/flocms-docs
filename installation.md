@@ -23,7 +23,7 @@ Composer installs the framework packages, copies `.env.example` to `.env`, creat
 Then it asks what you are building: a website, an admin panel, an API, or a mix. It adds only the packages that choice needs. See [choose what you build](/docs/{{version}}/setups).
 
 > [!NOTE]
-> All five FloCMS packages, core, API, CLI, uploader and CAPTCHA, use exact version requirements, and `composer.lock` records the installed versions. Deploy with `composer install` to preserve them. See [framework and packages](/docs/{{version}}/packages#versions-in-this-guide) and the [upgrade guide](/docs/{{version}}/upgrade).
+> `composer.lock` records the exact versions of the FloCMS packages a project installs. Deploy with `composer install` to preserve them, and change versions deliberately with `composer update`. See [framework and packages](/docs/{{version}}/packages#versions-in-this-guide) and the [upgrade guide](/docs/{{version}}/upgrade).
 
 ## Start a local server
 

@@ -10,7 +10,7 @@ FloCMS ships with four roles, defined in `config/config.php`:
 |---|---|---|
 | 0 | User | none |
 | 1 | Editor | `content.*` |
-| 2 | Admin | `content.*`, `users.manage`, `users.assign_role`, `settings.*` |
+| 2 | Admin | `content.*`, `users.manage`, `users.assign_role`, `settings.*`, `activity.view` |
 | 3 | Super Admin | `*` (everything) |
 
 ```php
@@ -24,7 +24,7 @@ Config::set('roles', array(
 Config::set('permissions', array(
     0 => array(),
     1 => array('content.*'),
-    2 => array('content.*', 'users.manage', 'users.assign_role', 'settings.*'),
+    2 => array('content.*', 'users.manage', 'users.assign_role', 'settings.*', 'activity.view'),
     3 => array('*'),
 ));
 ```
@@ -69,7 +69,9 @@ Auth::canAssignRole(2);   // may I give someone role 2? Needs users.assign_role,
 Auth::canManageUser(1);   // may I edit, delete or suspend a user with role 1? Needs users.manage
 ```
 
-`canManageUser()` only allows users of a strictly lower role, unless you hold `users.manage_any`. Super Admins hold `*`, so they can manage everyone.
+`canManageUser()` only allows users of a strictly lower role, unless you hold `users.manage_any`. Super Admins hold `*`, so they can manage everyone. Since core 2.4 both checks compare role **levels**: a role's level is its number unless a `levels` setting says otherwise, so roles added later can sit between the built-in ones.
+
+The skeleton has no users pages of its own. The [admin panel](/docs/{{version}}/admin-panel) adds users management and a Roles page that can change roles and permissions at runtime (through `Auth::loadRolesUsing()`, see [extending from a package](/docs/{{version}}/extending#roles-from-a-table)); or build your own, as in the [build your own admin](/docs/{{version}}/example-admin) example.
 
 From the command line:
 

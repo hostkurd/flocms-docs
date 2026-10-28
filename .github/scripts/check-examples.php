@@ -11,7 +11,7 @@ declare(strict_types=1);
 $docs = dirname(__DIR__, 2);
 $core = realpath(($argv[1] ?? '') . '/src');
 if ($core === false || !is_file($core . '/TemplateEngine.php')) {
-    fwrite(STDERR, "Supply the path to a Core 2.2.2 checkout.\n");
+    fwrite(STDERR, "Supply the path to a Core 2.9.0 checkout.\n");
     exit(1);
 }
 

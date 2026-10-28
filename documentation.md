@@ -12,6 +12,7 @@
     - [Framework and packages](/docs/{{version}}/packages)
     - [Request lifecycle](/docs/{{version}}/lifecycle)
     - [Service container](/docs/{{version}}/container)
+    - [Extending from a package](/docs/{{version}}/extending)
 - ## The basics
     - [Routing](/docs/{{version}}/routing)
     - [Controllers](/docs/{{version}}/controllers)
@@ -54,6 +55,7 @@
     - [Scheduler](/docs/{{version}}/scheduler)
     - [Maintenance mode](/docs/{{version}}/maintenance)
 - ## Packages
+    - [Admin panel](/docs/{{version}}/admin-panel)
     - [Uploads](/docs/{{version}}/uploader)
     - [Storage disks](/docs/{{version}}/storage)
     - [Captcha](/docs/{{version}}/captcha)
