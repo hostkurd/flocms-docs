@@ -4,8 +4,9 @@ FloCMS uses PHP's own sessions. `public/index.php` starts the session on every p
 
 ## The session cookie
 
-Before the session starts, `public/index.php` makes the session cookie safer than PHP's defaults:
+The session cookie is set up in one file, `includes/session.php`. `public/index.php` and `public/captcha.php` both start the session through its `flo_session_start()`, so they always share the same session. It makes the cookie safer than PHP's defaults:
 
+- named `flocms_session` (see [below](#the-cookies-name))
 - `HttpOnly`, so JavaScript can't read it
 - `SameSite=Lax`, so other sites can't send it with their forms
 - `Secure` when the request uses HTTPS
@@ -13,6 +14,18 @@ Before the session starts, `public/index.php` makes the session cookie safer tha
 - valid until the browser closes
 
 After a successful login, the skeleton also gives the user a new session ID (`session_regenerate_id()`), so a session ID known before the login is useless afterwards.
+
+### The cookie's name
+
+Since 2.1, the session cookie is called `flocms_session` instead of PHP's default `PHPSESSID`, the way CodeIgniter uses `ci_session`. Tools that report which software a site runs, such as Wappalyzer, recognise FloCMS sites by this name. FloCMS adds nothing else: no generator tag in your HTML and no `X-Powered-By` header.
+
+To use another name, or to hide that the site runs FloCMS, change the constant in `includes/session.php`:
+
+```php
+define('FLO_SESSION_NAME', 'myshop_session');
+```
+
+Use letters, digits and underscores, with at least one letter. The name can't come from `.env`, because the session starts before `.env` is read. Changing it signs everyone out once: their browsers still send the old cookie, which the site no longer reads.
 
 ## Storing values
 

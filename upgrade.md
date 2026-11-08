@@ -4,6 +4,27 @@
 
 Composer updates packages but never your project's own files (controllers, views, `config/`), so each section says which files to copy from the new skeleton. A site that copies nothing keeps working; it just doesn't get those changes.
 
+## From 2.0 to 2.1
+
+2.1 only changes files in your project, so `composer update` brings nothing here. To give your site the `flocms_session` cookie name:
+
+1. Copy `includes/session.php` from the 2.1 skeleton.
+2. In `public/index.php`, replace the `$isHttps = ...`, `session_set_cookie_params([...])` and `ini_set('session.*', ...)` lines with:
+
+    ```php
+    require_once ROOT . '/includes/session.php';
+    ```
+
+    and replace `session_start();` with `flo_session_start();`.
+3. In `public/captcha.php`, after the line that requires `vendor/autoload.php`, add:
+
+    ```php
+    require_once dirname(__DIR__) . '/includes/session.php';
+    flo_session_start();
+    ```
+
+Everyone signed in is signed out once when you deploy it. Skip this to keep `PHPSESSID`; nothing else depends on the name. See [the cookie's name](/docs/{{version}}/session#the-cookies-name).
+
 ## Core 2.9: SQLite for websites
 
 ```bash

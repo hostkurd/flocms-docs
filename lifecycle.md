@@ -8,7 +8,7 @@ You can build a FloCMS site without knowing what happens between the browser's r
 
 ```text
 Browser
-  → public/index.php            session cookie settings, Composer autoloader
+  → public/index.php            session cookie settings (includes/session.php), Composer autoloader
   → config/bootstrap.php        .env, error handler, APP_URL, config/config.php
   → maintenance check           503 while `php flo down` is active
   → App::run()
@@ -31,9 +31,9 @@ The web server's document root is `public/`. Its `.htaccess` file sends `/api/v1
 
 `public/index.php` then:
 
-- sets the session cookie to `HttpOnly` and `SameSite=Lax`, and `Secure` when the request uses HTTPS
+- loads the session cookie settings from `includes/session.php`: the name `flocms_session`, `HttpOnly`, `SameSite=Lax`, and `Secure` when the request uses HTTPS
 - loads Composer's autoloader
-- starts the session
+- starts the session with `flo_session_start()`
 - loads `config/bootstrap.php`
 
 ## 2. Bootstrap

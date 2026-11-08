@@ -1,6 +1,15 @@
 # Release notes
 
-FloCMS follows semantic versioning. The project skeleton has its own version (2.0.0) and requires the framework packages, each with its own version, with caret ranges such as `^2.8.0`; `composer.lock` records the exact versions a project installs. The full history is in the [changelog](https://github.com/hostkurd/FloCMS/blob/main/CHANGELOG.md). Moving an existing site to a new release is described in the [upgrade guide](/docs/{{version}}/upgrade).
+FloCMS follows semantic versioning. The project skeleton has its own version (2.1.0) and requires the framework packages, each with its own version, with caret ranges such as `^2.8.0`; `composer.lock` records the exact versions a project installs. The full history is in the [changelog](https://github.com/hostkurd/FloCMS/blob/main/CHANGELOG.md). Moving an existing site to a new release is described in the [upgrade guide](/docs/{{version}}/upgrade).
+
+## 2.1.0
+
+Released November 8, 2026. Requires core 2.9.0 (unchanged).
+
+- **The session cookie is called `flocms_session`** instead of PHP's default `PHPSESSID`, so tools such as Wappalyzer can recognise FloCMS sites. Nothing is added to your HTML. See [the cookie's name](/docs/{{version}}/session#the-cookies-name).
+- **One place for the session settings.** `includes/session.php` holds the cookie settings and `flo_session_start()`. `public/captcha.php` now uses it too, so the captcha always shares the site's session and gets the same safe cookie settings.
+
+Deploying it signs everyone out once. See [from 2.0 to 2.1](/docs/{{version}}/upgrade#from-20-to-21).
 
 ## Core 2.9.0
 
